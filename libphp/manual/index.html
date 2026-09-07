@@ -1,0 +1,1240 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manual de Usuario - Sistema MyCar</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f1f5f9; /* slate-100 */
+        }
+        .sidebar {
+            width: 280px;
+            flex-shrink: 0;
+            background-color: #f8fafc; /* slate-50 */
+            border-right: 1px solid #e2e8f0; /* slate-200 */
+        }
+        .main-content {
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+        .section {
+            display: none;
+        }
+        .section.active {
+            display: block;
+        }
+        .nav-link {
+            @apply flex items-center gap-3 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-indigo-50 hover:text-indigo-700 rounded-lg transition-colors;
+        }
+        .nav-link.active {
+            @apply bg-indigo-100 text-indigo-800 font-semibold;
+        }
+        .content-card {
+            @apply bg-white p-6 rounded-lg shadow-md border border-slate-200;
+        }
+        /* Custom styles for tables from constante2 JSON */
+        .json-table {
+            @apply min-w-full text-sm text-left text-gray-500;
+        }
+        .json-table th {
+            @apply px-4 py-2 font-medium text-gray-900 bg-gray-50 border-b;
+        }
+        .json-table td {
+            @apply px-4 py-2 border-b;
+        }
+        .json-table tr:nth-child(even) {
+            @apply bg-gray-50;
+        }
+        .json-table tr:hover {
+            @apply bg-gray-100;
+        }
+    </style>
+</head>
+<body class="flex h-screen overflow-hidden">
+
+    <!-- Sidebar de Navegación -->
+    <aside class="sidebar p-4 overflow-y-auto">
+        <div class="mb-6">
+            <h1 class="text-2xl font-bold text-slate-800 mb-2">Manual de Usuario</h1>
+            <p class="text-slate-500 text-sm">Sistema de Laboratorio "MyCar"</p>
+        </div>
+        <nav>
+            <ul class="space-y-2">
+                <li><a href="#introduccion" class="nav-link active" onclick="showSection('introduccion', this)"><i class="bi bi-info-circle-fill"></i>Introducción</a></li>
+                <li><a href="#registro-muestras" class="nav-link" onclick="showSection('registro-muestras', this)"><i class="bi bi-journal-plus"></i>Registro de Muestras</a></li>
+                <li><a href="#consulta-pacientes" class="nav-link" onclick="showSection('consulta-pacientes', this)"><i class="bi bi-person-lines-fill"></i>Consulta Pacientes (Público)</a></li>
+                <li><a href="#gestion-resultados" class="nav-link" onclick="showSection('gestion-resultados', this)"><i class="bi bi-clipboard-data"></i>Gestión de Resultados (Admin)</a></li>
+                <li><a href="#gestion-interna" class="nav-link" onclick="showSection('gestion-interna', this)"><i class="bi bi-gear-fill"></i>Gestión Interna del Laboratorio</a></li>
+                <li><a href="#diccionario-examenes" class="nav-link" onclick="showSection('diccionario-examenes', this)"><i class="bi bi-book"></i>Diccionario de Exámenes</a></li>
+            </ul>
+        </nav>
+    </aside>
+
+    <!-- Contenido Principal -->
+    <main class="main-content bg-slate-100 p-8">
+        <div id="introduccion" class="section active space-y-6">
+            <h2 class="text-3xl font-bold text-indigo-700 mb-4">Introducción al Sistema MyCar</h2>
+            <div class="content-card">
+                <h3 class="text-xl font-semibold text-slate-700 mb-3">Propósito del Sistema</h3>
+                <p class="text-slate-600 mb-4">El Sistema MyCar es una plataforma integral diseñada para la gestión de laboratorios clínicos, facilitando el registro de muestras, la consulta y publicación de resultados de exámenes de manera eficiente y segura. Orientado tanto a pacientes como a personal administrativo y de salud, busca optimizar los procesos de laboratorio y mejorar la comunicación de información vital.</p>
+                <p class="text-slate-600">Este manual proporciona una guía detallada para el uso de las diferentes funcionalidades del sistema, asegurando que los usuarios puedan aprovechar al máximo sus capacidades.</p>
+            </div>
+            <div class="content-card">
+                <h3 class="text-xl font-semibold text-slate-700 mb-3">Acceso al Sistema</h3>
+                <ul class="list-disc list-inside text-slate-600 space-y-2">
+                    <li><strong>Acceso para Pacientes:</strong> Los pacientes pueden consultar sus resultados a través de una interfaz web pública, proporcionando sus datos de identificación para acceder a sus reportes de exámenes.</li>
+                    <li><strong>Acceso para Personal Administrativo/Clínico:</strong> El personal autorizado del laboratorio accede a un panel de gestión que permite buscar, filtrar, imprimir y compartir resultados de exámenes, así como gestionar información relacionada con entidades y pacientes. El acceso a este panel requiere una autenticación mediante contraseña.</li>
+                </ul>
+            </div>
+        </div>
+
+        <div id="registro-muestras" class="section space-y-6">
+            <h2 class="text-3xl font-bold text-indigo-700 mb-4">Guía de Registro de Muestras</h2>
+            <div class="content-card">
+                <h3 class="text-xl font-semibold text-slate-700 mb-3">Interfaz de Registro de Muestras (<a href="https://mycar.iedeoccidente.com/web" target="_blank" class="text-blue-600 hover:underline">mycar.iedeoccidente.com/web</a>)</h3>
+                <p class="text-slate-600 mb-4">La interfaz en <a href="https://mycar.iedeoccidente.com/web" target="_blank" class="text-blue-600 hover:underline">mycar.iedeoccidente.com/web</a> es el punto de entrada para el registro inicial de muestras y datos de pacientes. Aquí, el personal de laboratorio ingresa la información necesaria a través de formularios dedicados, la cual será posteriormente gestionada y consultada en el sistema.</p>
+                <p class="text-slate-600 mb-4">Aunque el detalle específico de cada campo de entrada y validación depende de la configuración de esta interfaz, el flujo general para el registro de una muestra y sus exámenes asociados implica:</p>
+                <ol class="list-decimal list-inside text-slate-600 space-y-2 mb-4">
+                    <li><strong>Ingreso de Datos del Paciente:</strong> Se capturan datos demográficos y de contacto del paciente.</li>
+                    <li><strong>Asignación de Exámenes:</strong> Se seleccionan los exámenes solicitados para el paciente.</li>
+                    <li><strong>Registro de la Muestra:</strong> Se asocia la muestra física con el paciente y los exámenes asignados.</li>
+                    <li><strong>Generación de Órdenes:</strong> Se generan los documentos internos necesarios para el procesamiento de las muestras en el laboratorio.</li>
+                </ol>
+                <div class="bg-blue-50 border border-blue-200 text-blue-800 px-4 py-3 rounded-lg flex items-center gap-3">
+                    <i class="bi bi-lightbulb-fill text-lg"></i>
+                    <p class="text-sm"><strong>Nota:</strong> El proceso exacto de "registro de muestras" y sus campos de entrada específicos se gestionan directamente en la URL <a href="https://mycar.iedeoccidente.com/web" target="_blank" class="text-blue-700 underline">mycar.iedeoccidente.com/web</a>. Este manual se enfoca en la consulta y gestión de los resultados una vez que los datos han sido registrados en el sistema.</p>
+                </div>
+            </div>
+            <div class="content-card">
+                <h3 class="text-xl font-semibold text-slate-700 mb-3">Ayuda Visual: Interfaz de Registro</h3>
+                <div class="text-center p-4 border border-slate-300 rounded-md bg-slate-50">
+                    <img src="../images/docs/web_login.png" alt="Página de Inicio/Login del Sistema MyCar" class="rounded-lg shadow-md mx-auto max-w-full">
+                    <p class="text-slate-500 text-sm mt-2">Página de Inicio/Login del Sistema MyCar (mycar.iedeoccidente.com/web)</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="consulta-pacientes" class="section space-y-6">
+            <h2 class="text-3xl font-bold text-indigo-700 mb-4">Consulta de Resultados para Pacientes</h2>
+            <div class="content-card">
+                <h3 class="text-xl font-semibold text-slate-700 mb-3">Acceso a la Consulta Pública</h3>
+                <p class="text-slate-600 mb-4">Los pacientes pueden acceder a sus resultados de laboratorio de manera sencilla y segura a través de la interfaz pública de consulta. La URL de acceso es: <span class="font-mono bg-slate-100 px-2 py-1 rounded text-sm">/paciente.html</span> (o la ruta configurada para este archivo).</p>
+                <p class="text-slate-600 mb-4">La interfaz principal consta de un formulario de consulta donde deberá ingresar su información personal para acceder a sus exámenes.</p>
+                <div class="text-center p-4 border border-slate-300 rounded-md bg-slate-50 mb-4">
+                    <img src="../images/docs/panel_web_paciente.png" alt="Consulta de resultados para pacientes" class="rounded-lg shadow-md mx-auto max-w-full">
+                    <p class="text-slate-500 text-sm mt-2">Página de consulta de resultados para pacientes</p>
+                </div>
+            </div>
+            <div class="content-card">
+                <h3 class="text-xl font-semibold text-slate-700 mb-3">Pasos para Consultar Resultados</h3>
+                <ol class="list-decimal list-inside text-slate-600 space-y-3">
+                    <li><strong>Ingrese su Número de Identificación:</strong> En el campo <span class="font-bold">"Ingrese el número de identificación"</span>, escriba su documento de identidad completo.</li>
+                    <li><strong>Ingrese su Año de Nacimiento o Últimos Dígitos del Celular:</strong> En el campo <span class="font-bold">"Ingrese el año de nacimiento"</span>, introduzca su año de nacimiento. Alternativamente, puede usar los últimos 4 dígitos de su número de teléfono celular registrado en el laboratorio.</li>
+                    <li><strong>Haga Clic en "Consultar":</strong> Una vez introducidos los datos, presione el botón <span class="inline-flex items-center px-2 py-1 rounded-md text-sm font-bold bg-blue-600 text-white"><i class="bi bi-search mr-1"></i>Consultar</span>. El sistema procesará su solicitud y mostrará una lista de sus exámenes.</li>
+                    <li><strong>Visualice sus Exámenes:</strong> Si sus datos son correctos, se mostrará una tabla con todos los exámenes asociados a su identificación y fecha. Cada fila contendrá el nombre del examen, la fecha de realización y un botón "Ver".</li>
+                    <li><strong>Acceda al Reporte Detallado:</strong> Para ver el detalle de un examen específico, haga clic en el botón <span class="inline-flex items-center px-2 py-1 rounded-md text-sm font-medium bg-red-600 text-white"><i class="bi bi-eye-fill mr-1"></i>Ver</span> junto al examen deseado. Esto abrirá el reporte completo en una nueva ventana o pestaña.</li>
+                </ol>
+            </div>
+        </div>
+
+        <div id="gestion-resultados" class="section space-y-6">
+            <h2 class="text-3xl font-bold text-indigo-700 mb-4">Gestión de Resultados para Personal Administrativo/Clínico</h2>
+            <div class="content-card">
+                <h3 class="text-xl font-semibold text-slate-700 mb-3">Acceso al Panel de Gestión (<a href="https://mycar.iedeoccidente.com/prt.php" target="_blank" class="text-blue-600 hover:underline">mycar.iedeoccidente.com/prt.php</a>)</h3>
+                <p class="text-slate-600 mb-4">El panel de gestión es la herramienta principal para el personal del laboratorio. Para acceder, diríjase a <span class="font-mono bg-slate-100 px-2 py-1 rounded text-sm">/prt.php</span> y complete el formulario de inicio de sesión.</p>
+                <div class="text-center p-4 border border-slate-300 rounded-md bg-slate-50 mb-4">
+                    <img src="../images/docs/web_admin_panel.png" alt="Panel administrativo de gestión de resultados" class="rounded-lg shadow-md mx-auto max-w-full">
+                    <p class="text-slate-500 text-sm mt-2">Panel de gestión de resultados para personal administrativo</p>
+                </div>
+                <p class="text-slate-600 mb-4">Una vez acceda a <span class="font-mono bg-slate-100 px-2 py-1 rounded text-sm">/prt.php</span>, será dirigido directamente al panel principal de gestión de resultados si la sesión es válida. Este panel es la herramienta principal para el personal del laboratorio.</p>
+            </div>
+
+            <div class="content-card">
+                <h3 class="text-xl font-semibold text-slate-700 mb-3">Panel Principal de Resultados</h3>
+                <p class="text-slate-600 mb-4">Una vez dentro, el panel principal le permite visualizar y gestionar los exámenes de los pacientes. La interfaz está dividida en una barra superior, un panel lateral de filtros/pacientes y un área principal para la visualización de reportes.</p>
+                <div class="text-center p-4 border border-slate-300 rounded-md bg-slate-50 mb-4">
+                    <img src="../images/docs/web_lista_pacientes.png" alt="Vista general del panel administrativo" class="rounded-lg shadow-md mx-auto max-w-full">
+                    <p class="text-slate-500 text-sm mt-2">Vista general del panel administrativo con lista de pacientes y filtros</p>
+                </div>
+                <h4 class="text-lg font-semibold text-slate-700 mb-2">Barra Superior</h4>
+                <p class="text-slate-600 mb-3">Contiene el logo del laboratorio, el nombre del sistema, información del usuario autenticado y botones de acceso rápido a funcionalidades clave como <span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-bold bg-purple-600 text-white"><i class="bi bi-building mr-1"></i>ENTIDADES</span> y <span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-bold bg-green-600 text-white"><i class="bi bi-people-fill mr-1"></i>PACIENTES</span>, además del botón <span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-bold bg-red-500 text-white"><i class="bi bi-box-arrow-right mr-1"></i>SALIR</span> para cerrar sesión.</p>
+                <h4 class="text-lg font-semibold text-slate-700 mb-2">Panel Lateral (Filtros y Lista de Pacientes)</h4>
+                <p class="text-slate-600 mb-3">Este panel a la izquierda de la pantalla es donde puede buscar y seleccionar pacientes y sus exámenes.</p>
+                <ul class="list-disc list-inside text-slate-600 space-y-2">
+                    <li><strong>Filtro por Fecha:</strong> Un campo de tipo fecha (<input type="date" class="border rounded-md px-2 py-1 text-sm inline-block w-auto">) permite seleccionar una fecha específica para ver los pacientes con exámenes registrados en ese día.</li>
+                    <li><strong>Campo de Búsqueda:</strong> Un campo de texto (<input type="text" placeholder="Buscar..." class="border rounded-md px-2 py-1 text-sm inline-block w-auto">) para ingresar el número de identificación, nombres o apellidos del paciente para encontrarlo rápidamente.</li>
+                    <li><strong>"Buscar en todas las fechas":</strong> Una casilla de verificación (<input type="checkbox" class="align-middle">) permite buscar sin restricciones de fecha, útil para encontrar registros históricos.</li>
+                    <li><strong>Botón "FILTRAR":</strong> Aplica los criterios de búsqueda y actualiza la lista de pacientes. <span class="inline-flex items-center px-2 py-1 rounded-md text-sm font-bold bg-indigo-600 text-white"><i class="bi bi-funnel-fill mr-1"></i>FILTRAR</span></li>
+                    <li><strong>Lista de Pacientes:</strong> Muestra un resumen de los pacientes que cumplen con los criterios de búsqueda. Al hacer clic en un paciente, se expanden sus exámenes realizados para esa fecha.</li>
+                </ul>
+            </div>
+
+            <div class="content-card">
+                <h3 class="text-xl font-semibold text-slate-700 mb-3">Acciones con Exámenes de Pacientes</h3>
+                <p class="text-slate-600 mb-4">Desde la lista expandida de un paciente en el panel lateral, puede realizar las siguientes acciones:</p>
+                <ul class="list-disc list-inside text-slate-600 space-y-2">
+                    <li><strong>Imprimir Todo:</strong> Genera un reporte consolidado con todos los exámenes del paciente para esa fecha, listo para imprimir. <span class="inline-flex items-center px-2 py-1 rounded-md text-sm font-bold bg-white text-orange-500 border border-orange-300"><i class="bi bi-collection-fill mr-1"></i>Imprimir Todo</span></li>
+                    <li><strong>Enviar por WhatsApp:</strong> Permite enviar el reporte consolidado al número de WhatsApp registrado del paciente. <span class="inline-flex items-center px-2 py-1 rounded-md text-sm font-bold bg-white text-green-500 border border-green-300"><i class="bi bi-whatsapp mr-1"></i>WhatsApp</span></li>
+                    <li><strong>Ver Examen Individual:</strong> Para cada examen listado, hay un botón <span class="inline-flex items-center px-2 py-1 rounded-md text-sm font-medium bg-indigo-600 text-white"><i class="bi bi-eye-fill mr-1"></i></span> que abre el reporte detallado de ese examen específico en el visor principal.</li>
+                    <li><strong>Actualizar Entidad:</strong> Para cada examen, un menú desplegable permite asociar o cambiar la entidad de salud a la que pertenece el paciente.</li>
+                </ul>
+            </div>
+
+            <div class="content-card">
+                <h3 class="text-xl font-semibold text-slate-700 mb-3">Funcionalidades Avanzadas (Modales)</h3>
+                <h4 class="text-lg font-semibold text-slate-700 mb-2">Consulta por Entidades</h4>
+                <p class="text-slate-600 mb-3">Acceso desde el botón <span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-bold bg-purple-600 text-white"><i class="bi bi-building mr-1"></i>ENTIDADES</span> en la barra superior. Esta funcionalidad permite generar reportes y estadísticas basados en rangos de fechas y entidades.</p>
+                <div class="text-center p-4 border border-slate-300 rounded-md bg-slate-50 mb-4">
+                    <img src="../images/docs/web_consulta_entidades.png" alt="Modal de consulta por entidades" class="rounded-lg shadow-md mx-auto max-w-full">
+                    <p class="text-slate-500 text-sm mt-2">Modal de consulta por entidades con opciones de filtro</p>
+                </div>
+                <ul class="list-disc list-inside text-slate-600 space-y-2 mb-4">
+                    <li><strong>Filtros:</strong>
+                        <ul class="list-circle list-inside ml-4">
+                            <li><strong>Entidad:</strong> Menú desplegable para seleccionar una entidad específica o "Todas las entidades".</li>
+                            <li><strong>Fecha Inicio y Fecha Fin:</strong> Campos de fecha para definir el período de la consulta.</li>
+                            <li><strong>Mostrar solo exámenes con resultados:</strong> Casilla para incluir únicamente exámenes que ya tienen resultados registrados.</li>
+                            <li><strong>Agrupar resultados por fecha:</strong> Casilla para organizar los resultados agrupados por el día de realización.</li>
+                        </ul>
+                    </li>
+                    <li><strong>Resultados:</strong> Muestra un resumen de la consulta (total de exámenes, total de fechas cubiertas) y una lista detallada de los exámenes agrupados por fecha (si se seleccionó la opción). Cada examen muestra el paciente, identificación, edad, género y el nombre del examen, junto con su resultado y referencia rápida.</li>
+                    <li><strong>Acciones:</strong> Desde esta modal, puede <span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-bold bg-green-600 text-white"><i class="bi bi-file-earmark-excel mr-1"></i>EXPORTAR a EXCEL</span> los resultados o <span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-bold bg-white text-gray-800 border border-gray-300"><i class="bi bi-printer mr-1"></i>IMPRIMIR</span> la lista visualizada.</li>
+                </ul>
+
+                <h4 class="text-lg font-semibold text-slate-700 mt-6 mb-2">Búsqueda de Pacientes</h4>
+                <p class="text-slate-600 mb-3">Acceso desde el botón <span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-bold bg-green-600 text-white"><i class="bi bi-people-fill mr-1"></i>PACIENTES</span> en la barra superior. Permite realizar búsquedas exhaustivas de pacientes registrados en el sistema, incluyendo sus datos demográficos y un resumen de sus exámenes.</p>
+                <ul class="list-disc list-inside text-slate-600 space-y-2 mb-4">
+                    <li><strong>Filtros:</strong>
+                        <ul class="list-circle list-inside ml-4">
+                            <li><strong>Identificación:</strong> Número de documento del paciente.</li>
+                            <li><strong>Nombres Completos:</strong> Nombres y apellidos del paciente.</li>
+                            <li><strong>Teléfono:</strong> Número de contacto del paciente.</li>
+                            <li><strong>Ciudad:</strong> Ciudad de residencia del paciente.</li>
+                            <li><strong>Entidad:</strong> Entidad de salud a la que pertenece el paciente.</li>
+                        </ul>
+                    </li>
+                    <li><strong>Resultados:</strong> Presenta una lista de tarjetas de pacientes coincidentes, mostrando información detallada (nombre completo, identificación, edad, género, contacto, dirección, entidad). Cada tarjeta permite expandir para ver un resumen de sus exámenes con las fechas y códigos.</li>
+                    <li><strong>Acciones:</strong> Puede <span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-bold bg-white text-green-700 border border-green-300"><i class="bi bi-file-earmark-excel mr-1"></i>EXPORTAR a EXCEL</span> la lista de pacientes encontrados o <span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-bold bg-green-600 text-white"><i class="bi bi-eye mr-1"></i>VER</span> el perfil completo de un paciente individual para cargarlo en el panel principal.</li>
+                </ul>
+                <div class="text-center p-4 border border-slate-300 rounded-md bg-slate-50">
+                    <img src="../images/docs/web_busqueda_pacientes.png" alt="Modal de búsqueda de pacientes con filtros y resultados" class="rounded-lg shadow-md mx-auto max-w-full">
+                    <p class="text-slate-500 text-sm mt-2">Modal de búsqueda de pacientes con filtros y resultados</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="gestion-interna" class="section space-y-6">
+            <h2 class="text-3xl font-bold text-indigo-700 mb-4">Gestión Interna del Laboratorio</h2>
+            <div class="content-card">
+                <h3 class="text-xl font-semibold text-slate-700 mb-3">Descripción General de Funcionalidades Administrativas</h3>
+                <p class="text-slate-600 mb-4">Esta sección detalla las funciones administrativas y operativas del sistema, accesibles para el personal autorizado del laboratorio. Abarca la gestión de datos de pacientes, resultados de exámenes, configuración del sistema y mantenimiento de procedimientos.</p>
+            </div>
+
+            <div class="content-card">
+                <h3 class="text-xl font-semibold text-slate-700 mb-3">Gestión de Pacientes (Administración)</h3>
+                <p class="text-slate-600 mb-4">El sistema permite al personal administrativo buscar y acceder a la información de los pacientes de diversas maneras:</p>
+                <ul class="list-disc list-inside text-slate-600 space-y-2">
+                    <li><strong>Búsqueda General de Pacientes:</strong> Permite obtener un listado completo de pacientes o filtrar por criterios específicos (nombre, identificación, etc.).</li>
+                    <li><strong>Búsqueda de Pacientes por Fecha:</strong> Facilita encontrar pacientes que han tenido exámenes registrados en una fecha particular.</li>
+                    <li><strong>Consulta Detallada de Paciente:</strong> Accede a toda la información de un paciente utilizando su número de identificación.</li>
+                </ul>
+            </div>
+
+            <div class="content-card">
+                <h3 class="text-xl font-semibold text-slate-700 mb-3">Gestión de Exámenes (Resultados y Edición)</h3>
+                <p class="text-slate-600 mb-4">Esta funcionalidad es clave para el laboratorio, permitiendo la consulta y gestión de los resultados de los exámenes:</p>
+                <ul class="list-disc list-inside text-slate-600 space-y-2">
+                    <li><strong>Consulta de Exámenes por Paciente:</strong> Obtiene un listado de todos los exámenes asociados a un paciente, pudiendo filtrar por fechas.</li>
+                    <li><strong>Acceso a Tipos de Examen Específicos:</strong> El sistema soporta la recuperación detallada de resultados para diversos tipos de exámenes, incluyendo:
+                        <ul class="list-circle list-inside ml-4">
+                            <li>Hemogramas (incluyendo versiones Rayto).</li>
+                            <li>Uroanálisis (Parcial de Orina).</li>
+                            <li>Coprológicos.</li>
+                            <li>Frotis Vaginal.</li>
+                            <li>Perfiles Lipídicos.</li>
+                            <li>Exámenes Genéricos Tipo 1 y Tipo 2 (para resultados simples o específicos).</li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="content-card">
+                <h3 class="text-xl font-semibold text-slate-700 mb-3">Guardado y Actualización de Resultados de Exámenes</h3>
+                <p class="text-slate-600 mb-4">El personal del laboratorio puede registrar y actualizar los resultados de los exámenes en el sistema:</p>
+                <ul class="list-disc list-inside text-slate-600 space-y-2">
+                    <li><strong>Registro de Resultados por Tipo de Examen:</strong> Permite guardar los datos específicos para Hemogramas, Uroanálisis, Coprológicos, Frotis Vaginal, Perfiles Lipídicos y Exámenes Genéricos (Tipo 1 y Tipo 2).</li>
+                    <li><strong>Asignación Múltiple de Exámenes:</strong> Es posible guardar un conjunto de exámenes asignados a un paciente en una fecha determinada.</li>
+                    <li><strong>Actualización de Estado de Examen:</strong> El sistema marca un examen como procesado o guardado una vez que sus resultados han sido registrados.</li>
+                </ul>
+            </div>
+
+            <div class="content-card">
+                <h3 class="text-xl font-semibold text-slate-700 mb-3">Registro de Pacientes (Aplicación Desktop)</h3>
+                <p class="text-slate-600 mb-4">La aplicación Flutter de escritorio permite registrar nuevos pacientes en el sistema. El proceso se realiza a través de la página "Crear Paciente":</p>
+                <ul class="list-disc list-inside text-slate-600 space-y-2 mb-4">
+                    <li><strong>Acceso:</strong> Navegar a la sección dePacientes en el panel decontrols de la aplicación.</li>
+                    <li><strong>Formulario de Registro:</strong>
+                        <ul class="list-circle list-inside ml-4">
+                            <li><strong>Identificación:</strong> Número de documento único (mínimo 6 dígitos). Este campo es la clave primaria del paciente.</li>
+                            <li><strong>Nombres:</strong> Nombres completos del paciente (mínimo 3 caracteres).</li>
+                            <li><strong>Apellidos:</strong> Apellidos completos del paciente (mínimo 5 caracteres).</li>
+                            <li><strong>Fecha de Nacimiento:</strong> Selector de fecha en formato YYYY-MM-DD.</li>
+                            <li><strong>Género:</strong> Selector entre Masculino, Femenino u Otro.</li>
+                            <li><strong>Teléfono:</strong> Número de contacto (mínimo 10 dígitos).</li>
+                            <li><strong>Correo:</strong> Dirección de correo electrónico válida.</li>
+                            <li><strong>Entidad:</strong> Entidad de salud a la que pertenece el paciente.</li>
+                        </ul>
+                    </li>
+                    <li><strong>Validaciones:</strong> El sistema valida automáticamente cada campo antes de permitir el guardado.</li>
+                    <li><strong>Edición:</strong> Al ingresar una identificación existente, el sistema carga los datos para su actualización.</li>
+                </ul>
+                <div class="bg-blue-50 border border-blue-200 text-blue-800 px-4 py-3 rounded-lg">
+                    <p class="text-sm"><strong>Endpoint:</strong> <code class="bg-slate-100 px-1 rounded">savePaciente.php</code> - Recibe un objeto JSON con todos los campos del paciente y lo almacena en la base de datos.</p>
+                </div>
+            </div>
+
+            <div class="content-card">
+                <h3 class="text-xl font-semibold text-slate-700 mb-3">Creación de Exámenes para Pacientes</h3>
+                <p class="text-slate-600 mb-4">Para registrar exámenes asociados a un paciente, la aplicación permite:</p>
+                <ul class="list-disc list-inside text-slate-600 space-y-2 mb-4">
+                    <li><strong>Seleccionar Paciente:</strong> Ingresar el número de identificación del paciente en el campo de búsqueda.</li>
+                    <li><strong>Seleccionar Fecha:</strong> Elegir la fecha en que se realizarán los exámenes (por defecto, la fecha actual).</li>
+                    <li><strong>Elegir Exámenes:</strong> Del catálogo de procedimientos disponibles, seleccionar uno o más exámenes asignados.</li>
+                    <li><strong>Confirmar Asignación:</strong> Guardar la lista de exámenes asociados al paciente y fecha.</li>
+                </ul>
+                <div class="bg-blue-50 border border-blue-200 text-blue-800 px-4 py-3 rounded-lg mb-4">
+                    <p class="text-sm"><strong>API:</strong> <code class="bg-slate-100 px-1 rounded">guardarExamenes.php</code> - Recibe JSON con identificación, fecha y lista de procedimientos.</p>
+                </div>
+                <p class="text-slate-600">El sistema luego permite buscar estos exámenes por fecha o por paciente para registrar sus resultados.</p>
+            </div>
+
+            <div class="content-card">
+                <h3 class="text-xl font-semibold text-slate-700 mb-3">Registro de Resultados de Exámenes</h3>
+                <p class="text-slate-600 mb-4">Cada tipo de examen tiene su propio formulario de captura de resultados. El sistema detecta automáticamente el tipo de examen según el código asignado y carga el formulario correspondiente.</p>
+                
+                <h4 class="text-lg font-semibold text-slate-700 mb-2">Flujo de Registro de Resultados</h4>
+                <ol class="list-decimal list-inside text-slate-600 space-y-2 mb-4">
+                    <li><strong>Buscar Examen:</strong> Desde el panel de consulta, buscar el examen asignado al paciente.</li>
+                    <li><strong>Seleccionar Tipo:</strong> El sistema carga el formulario correspondiente al tipo de exame.</li>
+                    <li><strong>Completar Resultados:</strong> Llenar cada campo con los valores obtenidos del análisis.</li>
+                    <li><strong>Guardar:</strong> Guardar los resultados. El sistema automáticamente marca el exame como "procesado".</li>
+                    <li><strong>Imprimir (opcional):</strong> Generar el reporte PDF para entregar al paciente.</li>
+                </ol>
+
+                <div class="bg-yellow-50 border border-yellow-200 text-yellow-800 px-4 py-3 rounded-lg">
+                    <p class="text-sm"><strong>Importante:</strong> Después de guardar los resultados, el sistema llama automáticamente a <code class="bg-slate-100 px-1 rounded">updateExamen.php</code> para marcar el exame como realizado. Esto actualiza el estado en la lista de exámenes del paciente.</p>
+                </div>
+            </div>
+
+            <div class="content-card">
+                <h3 class="text-xl font-semibold text-slate-700 mb-3">Impresión de Reportes</h3>
+                <p class="text-slate-600 mb-4">La generación de informes en formato PDF es una función esencial. El sistema permite:</p>
+                <ul class="list-disc list-inside text-slate-600 space-y-2">
+                    <li><strong>Generación de PDF por Examen:</strong> Imprime un reporte detallado de un examen específico de un paciente, incluyendo sus datos demográficos y los resultados.</li>
+                    <li>El sistema utiliza una interfaz web para previsualizar y generar estos documentos, garantizando un formato profesional y listo para entregar.</li>
+                </ul>
+            </div>
+
+            <div class="content-card">
+                <h3 class="text-xl font-semibold text-slate-700 mb-3">Gestión de Configuración</h3>
+                <p class="text-slate-600 mb-4">El sistema ofrece opciones para gestionar su configuración, lo que permite adaptar ciertos parámetros a las necesidades del laboratorio:</p>
+                <ul class="list-disc list-inside text-slate-600 space-y-2">
+                    <li><strong>Recuperación de Configuración:</strong> Carga la configuración actual del sistema.</li>
+                    <li><strong>Guardado de Configuración:</strong> Permite actualizar y almacenar la configuración modificada.</li>
+                </ul>
+            </div>
+
+            <div class="content-card">
+                <h3 class="text-xl font-semibold text-slate-700 mb-3">Gestión de Procedimientos y Constantes</h3>
+                <p class="text-slate-600 mb-4">Para el control de los servicios ofrecidos, el sistema permite:</p>
+                <ul class="list-disc list-inside text-slate-600 space-y-2">
+                    <li><strong>Consulta de Procedimientos:</strong> Obtiene un listado de todos los exámenes y procedimientos disponibles.</li>
+                    <li><strong>Consulta Detallada de Procedimiento:</strong> Accede a la información específica de un procedimiento (código, nombre, valores de referencia, etc.).</li>
+                    <li><strong>Guardado de Procedimientos:</strong> Permite añadir nuevos procedimientos o actualizar los existentes.</li>
+                    <li><strong>Gestión de Ítems de Exámenes:</strong> Administra listas de opciones o valores predefinidos asociados a ciertos campos de exámenes.</li>
+                    <li><strong>Consulta de Unidades y Constantes:</strong> Proporciona acceso a las unidades de medida y valores constantes asociados a los exámenes.</li>
+                </ul>
+            </div>
+
+            <div class="content-card">
+                <h3 class="text-xl font-semibold text-slate-700 mb-3">Eliminación de Exámenes</h3>
+                <p class="text-slate-600 mb-4">En casos necesarios, el sistema permite eliminar registros de exámenes:</p>
+                <ul class="list-disc list-inside text-slate-600 space-y-2">
+                    <li><strong>Borrado de Exámenes:</strong> Elimina un examen específico asociado a un paciente y una fecha.</li>
+                </ul>
+            </div>
+        </div>
+            <h2 class="text-3xl font-bold text-indigo-700 mb-4">Diccionario de Exámenes</h2>
+            <div class="content-card">
+                <h3 class="text-xl font-semibold text-slate-700 mb-3">Catálogo de Procedimientos y Valores de Referencia</h3>
+                <p class="text-slate-600 mb-4">Esta sección detalla los exámenes disponibles en el sistema, incluyendo su código, nombre, las tablas de base de datos donde se almacenan sus resultados y, lo más importante, sus valores de referencia. Los valores de referencia son cruciales para la interpretación de los resultados por parte del personal de salud.</p>
+
+                <div class="mb-4">
+                    <div class="relative">
+                        <i class="bi bi-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                        <input type="text" id="buscar-examen" placeholder="Buscar examen por código o nombre..." 
+                            class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+                            oninput="filtrarExamenes(this.value)">
+                    </div>
+                </div>
+
+                <div id="diccionario-contenedor"></div>
+            </div>
+        </div>
+    </main>
+
+    <script type="text/plain" id="sql-data">
+INSERT INTO `procedimientos` (`ind`, `codigo`, `uuid`, `nombre`, `tabla`, `info`, `color`, `constante`, `constante2`, `unidades`, `tipo`, `tipoprocedimiento`, `abreviatura`) VALUES
+(1, '0001', 0x000000000000000000000000000000000000000000000000000000000000000000000000, 'ACIDO URICO', 'examen_tipo_1', 'ACIDO URICO', '146;181;213', '1.5-7.0mg/dl   METODOLOGÍA: ENZIMATICO-TRINDER', '', 'mg/dl', '1', '903801', 'ACIDO URICO'),
+(12, '0012', 0x63623461643830632d323532642d313165662d396534312d353235343030373338626236, 'TITULO ANTIESTREPTOLISINA O', 'examen_tipo_1', 'TITULO ANTIESTREPTOLISINA O', '158;149;172', 'N : Hasta 200 UI/ml', '', 'UI/ml', '1', '906002', 'TITULO ANTIESTREPTOLISINA O'),
+(13, '0027', 0x63623461643835662d323532642d313165662d396534312d353235343030373338626236, 'COLESTEROL LDL NI OS Y ADOLESCENTES', 'examen_tipo_1', 'COLESTEROL LDL NI OS Y ADOLESCENTES', '131;132;252', 'Menor de 110 mg/dl', '', 'mg/dl', '1', '', 'COLESTEROL LDL NI OS Y ADOLESCENTES'),
+(14, '0028', 0x63623461643861352d323532642d313165662d396534312d353235343030373338626236, 'COLESTEROL VLDL', 'examen_tipo_1', 'COLESTEROL VLDL', '160;253;200', '20 a 30 mg/dl', '', 'mg/dl', '1', '', 'COLESTEROL VLDL'),
+(15, '0015', 0x63623461643865382d323532642d313165662d396534312d353235343030373338626236, 'BILIRRUBINA DIRECTA', 'examen_tipo_1', 'BILIRRUBINA DIRECTA', '161;144;161', '0 - 0.3', '', 'mg/dl', '1', '903809', 'BILIRRUBINA DIRECTA'),
+(16, '0032', 0x63623461643932342d323532642d313165662d396534312d353235343030373338626236, 'TRIGLICERIDOS NI OS Y ADOLESCENTES', 'examen_tipo_1', 'TRIGLICERIDOS NI OS Y ADOLESCENTES', '153;131;194', 'Menor de 140 mg/dl', '', 'mg/dl', '1', '903868', 'TRIGLICERIDOS NI OS Y ADOLESCENTES'),
+(17, '0034', 0x63623461643936302d323532642d313165662d396534312d353235343030373338626236, 'FACTOR COL. T/HDL', 'examen_tipo_1', 'FACTOR COL. T/HDL', '141;110;135', 'Menos de 4 mg/dl', '', 'mg/dl', '1', '', 'FACTOR COL. T/HDL'),
+(18, '0018', 0x63623461643961302d323532642d313165662d396534312d353235343030373338626236, 'BILIRRUBINA TOTAL', 'examen_tipo_1', 'BILIRRUBINA TOTAL', '171;163;174', '0 - 1', '', 'mg/dl', '1', '', 'BILIRRUBINA TOTAL'),
+(19, '0019', 0x63623461643964662d323532642d313165662d396534312d353235343030373338626236, 'BILIRUBINA INDIRECTA', 'examen_tipo_1', 'BILIRUBINA INDIRECTA', '176;206;134', '', '', 'mg/dl', '1', '', 'BILIRUBINA INDIRECTA'),
+(20, '0037', 0x63623461646131662d323532642d313165662d396534312d353235343030373338626236, 'TEST O SULLIVAN', 'examen_tipo_1', 'TEST O SULLIVAN', '156;224;146', 'Hasta  135 mg/dl', '', 'mg/dl', '1', '903845', 'TEST O SULLIVAN'),
+(21, '0021', 0x000000000000000000000000000000000000000000000000000000000000000000000000, 'COLESTEROL TOTAL', 'examen_tipo_1', 'COLESTEROL TOTAL', '132;171;170', 'Menor de 200 mg/dl        ', '', 'mg/dl', '1', '903818', 'COLESTEROL TOTAL'),
+(22, '0022', 0x63623461646161362d323532642d313165662d396534312d353235343030373338626236, 'COLESTEROL NI OS Y ADOLESCENTES', 'examen_tipo_1', 'COLESTEROL NI OS Y ADOLESCENTES', '244;203;169', 'Menor de 170 mg/dl', '', 'mg/dl', '1', '903818', 'COLESTEROL NI OS Y ADOLESCENTES'),
+(23, '0023', 0x000000000000000000000000000000000000000000000000000000000000000000000000, 'COLESTEROL HDL', 'examen_tipo_1', 'COLESTEROL HDL', '169;133;197', 'H: Sup a 39   M: Sup a 45 mg/dl', '', 'mg/dl', '1', '903815', 'COLESTEROL HDL'),
+(24, '0024', 0x63623461646232392d323532642d313165662d396534312d353235343030373338626236, 'COLESTEROL HDL MUJER', 'examen_tipo_1', 'COLESTEROL HDL MUJER', '132;187;165', 'Sup a 45 mg/dl', '', 'mg/dl', '1', '0903815', 'COLESTEROL HDL MUJER'),
+(25, '0042', 0x63623461646236362d323532642d313165662d396534312d353235343030373338626236, 'CREATININA (SÉRICA)', 'examen_tipo_1', 'CREATININA (CINETICA)', '105;155;180', 'H 0.7-1.3   M:0.5-1.1 mg/dl', '', 'mg/dl', '1', '903825', 'CREATININA (CINETICA)'),
+(26, '0043', 0x63623461646261372d323532642d313165662d396534312d353235343030373338626236, 'ALBUMINAS', 'examen_tipo_1', 'ALBUMINAS', '168;113;119', '3.5 a 4.8   g/dl', '', 'g/dl', '1', '903803', 'ALBUMINAS'),
+(27, '0044', 0x63623461646265372d323532642d313165662d396534312d353235343030373338626236, 'GLOBULINAS', 'examen_tipo_1', 'GLOBULINAS', '154;162;239', '', '', '', '1', '', 'GLOBULINAS'),
+(28, '0045', 0x63623461646332352d323532642d313165662d396534312d353235343030373338626236, 'PROTEINAS TOTALES', 'examen_tipo_1', 'PROTEINAS TOTALES', '174;154;145', '6.6 a  8.3   g/dl', '', 'g/dl', '1', '903863', 'PROTEINAS TOTALES'),
+(29, '0046', 0x63623461646336322d323532642d313165662d396534312d353235343030373338626236, 'PROTEINAS DIFERENCIADAS ALB./GLOB.', 'examen_tipo_1', 'PROTEINAS DIFERENCIADAS ALB./GLOB.', '106;174;143', '', '', '', '1', '903861', 'PROTEINAS DIFERENCIADAS ALBUMINAS/GLOBULINAS'),
+(30, '0047', 0x63623461646361352d323532642d313165662d396534312d353235343030373338626236, 'ASPARTATO AMINO TRANSFERASA', 'examen_tipo_1', 'ASPARTATO AMINO TRANSFERASA', '250;108;151', 'HASTA 40', '', 'U/L', '1', '903867', 'ASPARTATO AMINO TRANSFERASA'),
+(31, '0048', 0x63623461646365362d323532642d313165662d396534312d353235343030373338626236, 'ALANINA AMINO TRANSFERASA', 'examen_tipo_1', 'ALANINA AMINO TRANSFERASA', '128;131;107', 'Hasta 41  U/L', '', 'U/L', '1', '903866', 'ALANINA AMINO TRANSFERASA'),
+(32, '0052', 0x63623461646432372d323532642d313165662d396534312d353235343030373338626236, 'FOSFATASA ALKALINA ADULTO', 'examen_tipo_1', 'FOSFATASA ALKALINA ADULTO', '185;172;124', '30 a 128 U/L', '', 'U/L', '1', '903833', 'FOSFATASA ALKALINA ADULTO'),
+(33, '0053', 0x63623461646436352d323532642d313165662d396534312d353235343030373338626236, 'FOSFATASA ALKALINA NI OS', 'examen_tipo_1', 'FOSFATASA ALKALINA NI OS', '160;174;133', '75 a 390 U/L', '', 'U/L', '1', '903833', 'FOSFATASA ALKALINA NI OS'),
+(34, '0054', 0x63623461646461362d323532642d313165662d396534312d353235343030373338626236, 'FOSFATASA ACIDA TOTAL', 'examen_tipo_1', 'FOSFATASA ACIDA TOTAL', '164;144;228', 'HASTA 13.5   IU/L', '', 'U/DL', '1', '903830', 'FOSFATASA ACIDA TOTAL'),
+(35, '0055', 0x63623461646465362d323532642d313165662d396534312d353235343030373338626236, 'FOSFATASA ACIDA PROSTATICA', 'examen_tipo_1', 'FOSFATASA ACIDA PROSTATICA', '198;130;169', '0 A 2.6  U/L', '', 'U/L', '1', '903831', 'FOSFATASA ACIDA PROSTATICA'),
+(36, '0056', 0x63623461646532392d323532642d313165662d396534312d353235343030373338626236, 'TIEMPO COAGULACION', 'examen_tipo_1', 'TIEMPO COAGULACION', '184;159;242', '5 a 15 Minutos', '', 'Minutos', '1', '902043', 'TIEMPO COAGULACION'),
+(37, '0058', 0x63623461646536632d323532642d313165662d396534312d353235343030373338626236, 'TIEMPO SANGRIA', 'examen_tipo_1', 'TIEMPO SANGRIA', '222;129;234', '1 a 3 Minutos', '', '', '1', '902046', 'TIEMPO SANGRIA'),
+(38, '0060', 0x000000000000000000000000000000000000000000000000000000000000000000000000, 'TIEMPO DE PROTOMBINA', 'examen_tipo_1', '0', '110;151;194', ' 10 - 14 segundos', '', 'Segundos', '1', '902045', 'TIEMPO DE PROTOMBINA'),
+(39, '0062', 0x000000000000000000000000000000000000000000000000000000000000000000000000, 'TIEMPO PARCIAL DE TROMBOPLASTINA', 'examen_tipo_1', 'TIEMPO PARCIAL DE TROMBOPLASTINA', '103;208;104', '33 - 48 segundos ', '', 'Segundos', '1', '902049', 'TIEMPO PARCIAL DE TROMBOPLASTINA'),
+(40, '0063', 0x63623461646632362d323532642d313165662d396534312d353235343030373338626236, 'INR', 'examen_tipo_2', 'INR', '175;154;178', '', '', '', '2', '', 'INR'),
+(41, '0064', 0x6362346164663632d323532642d313165662d396534312d353235343030373338626236, 'TEST CELULAS L.E.', 'examen_tipo_1', 'TEST CELULAS L.E.', '167;113;120', '', '', '', '1', '902101', 'TEST CELULAS L.E.'),
+(42, '0066', 0x63623461646665322d323532642d313165662d396534312d353235343030373338626236, 'EOSINOFILOS EN MOCO NASAL', 'examen_tipo_2', 'EOSINOFILOS EN MOCO NASAL', '158;132;169', '', '', '', '2', '902218', 'EOSINOFILOS EN MOCO NASAL'),
+(43, '0068', 0x63623461653031662d323532642d313165662d396534312d353235343030373338626236, 'HEMOGLOBINA', 'examen_tipo_1', 'HEMOGLOBINA', '178;120;148', 'H:13-18   M 12-16 g/dl', '', 'g/dl', '1', '902213', 'HEMOGLOBINA'),
+(44, '0069', 0x000000000000000000000000000000000000000000000000000000000000000000000000, 'HEMOGLOBINA GLICOSILADA', 'examen_tipo_2', 'HEMOGLOBINA GLICOSILADA', '128;196;151', 'NO DIABETICO : menor a 5.6%', '<table border="1">
+  <thead>
+    <tr>
+      <th>Clasificación</th>
+      <th>Rango (%)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Normal.</td>
+      <td>Menor al 5.7%</td>
+    </tr>
+    <tr>
+      <td>Prediabetes</td>
+      <td>Entre 5.7% y 6.4%</td>
+    </tr>
+    <tr>
+      <td>Diabetes (sin diagnóstico previo)</td>
+      <td>Entre 6.5% y 7.0%</td>
+    </tr>
+    <tr>
+      <td>Control adecuado en diabéticos</td>
+      <td>Entre 6.5% y 7.0%</td>
+    </tr>
+    <tr>
+      <td>Resultado anormal en diabéticos</td>
+      <td>Entre 7.1% y 7.9%</td>
+    </tr>
+    <tr>
+      <td>Diabetes mal controlada</td>
+      <td>Por encima de 8.0%</td>
+    </tr>
+  </tbody>
+</table>
+', '%', '2', '903426', 'HEMOGLOBINA GLICOSILADA'),
+(45, '0070', 0x63623461653039622d323532642d313165662d396534312d353235343030373338626236, 'HEMATOCRITO', 'examen_tipo_1', 'HEMATOCRITO', '153;189;170', 'H:45-47  M:42-45 %', '', '%', '1', '902211', 'HEMATOCRITO'),
+(46, '0071', 0x63623461653064612d323532642d313165662d396534312d353235343030373338626236, 'SEDIMENTACION', 'examen_tipo_1', 'SEDIMENTACION', '117;144;174', '', '', '', '1', '902204', 'SEDIMENTACION'),
+(47, '0072', 0x63623461653131352d323532642d313165662d396534312d353235343030373338626236, 'PRUEBA INMUNOLOGICA EMBARAZO', 'examen_tipo_1', 'PRUEBA INMUNOLOGICA EMBARAZO', '184;124;162', '', '', '', '1', '904508', 'PRUEBA INMUNOLOGICA EMBARAZO'),
+(48, '0073', 0x63623461653135322d323532642d313165662d396534312d353235343030373338626236, 'GONADOTROPINA CORIONICA (BHCG)', 'examen_tipo_2', 'GONADOTROPINA CORIONICA (BHCG)', '178;150;216', '', '', '', '2', '906625', 'GONADOTROPINA CORIONICA (BHCG)'),
+(49, '0074', 0x63623461653138642d323532642d313165662d396534312d353235343030373338626236, 'SEROLOGIA VDRL', 'examen_tipo_1', 'SEROLOGIA VDRL', '171;198;175', '', '', '', '1', '906916', 'SEROLOGIA VDRL'),
+(50, '0076', 0x000000000000000000000000000000000000000000000000000000000000000000000000, 'LATEX ARTRITIS REUMATOIDEA', 'examen_tipo_1', 'FACTOR REUMATOIDEO ', '116;110;104', 'Inferior a  30  UI/ml', '', 'UI/ml', '1', '906911', 'FACTOR REUMATOIDEO'),
+(51, '0077', 0x63623461653230372d323532642d313165662d396534312d353235343030373338626236, 'TIROGLOBULINA', 'examen_tipo_1', 'TIROGLOBULINA', '242;168;168', '0.73 - 55', '', 'ng/ml', '1', '904920', 'TIROGLOBULINA'),
+(52, '0078', 0x000000000000000000000000000000000000000000000000000000000000000000000000, 'PROTEINA C REACTIVA', 'examen_tipo_1', 'PROTEINA C REACTIVA', '134;198;135', 'Inferior a 6 mg/l', '', 'mg/l', '1', '906914', 'PROTEINA C REACTIVA'),
+(53, '0079', 0x63623461653237622d323532642d313165662d396534312d353235343030373338626236, 'CLORO', 'examen_tipo_1', 'CLORO', '206;154;154', '97 a 111', '', 'mmol/Lt', '1', '903813', 'CLORO'),
+(54, '0080', 0x63623461653262372d323532642d313165662d396534312d353235343030373338626236, 'CREATIN QUINASA TOTAL CK- CPK', 'examen_tipo_2', 'CREATIN QUINASA TOTAL CK- CPK', '176;161;233', '', '', 'U/lt', '2', '903821', 'CREATININA FOSFOCINASA CPK TOTAL'),
+(55, '0081', 0x63623461653266302d323532642d313165662d396534312d353235343030373338626236, 'TRANSFERRINA', 'examen_tipo_1', 'TRANSFERRINA', '157;118;174', '200 - 360', '', 'mg/dl', '1', '903045', 'TRANSFERRINA'),
+(56, '0082', 0x63623461653332622d323532642d313165662d396534312d353235343030373338626236, 'CREATIN QUINASA (FRACCCION MB)', 'examen_tipo_2', 'CREATIN QUINASA (FRACCCION MB)', '108;211;250', '', '', 'U/lt', '2', '903819', 'CREATINA FOSFOCINASA MB'),
+(57, '0083', 0x63623461653336382d323532642d313165662d396534312d353235343030373338626236, 'FIBRINOGENO', 'examen_tipo_1', 'FIBRINOGENO', '163;116;146', '200 A 400 mg/dl', '', 'mg/dl', '1', '902024', 'FIBRINOGENO'),
+(58, '0084', 0x63623461653361332d323532642d313165662d396534312d353235343030373338626236, 'HIERRO SERICO', 'examen_tipo_1', 'HIERRO SERICO', '127;254;168', '60 A 160', '', 'mg/dl', '1', '903846', 'HIERRO SERICO'),
+(59, '0085', 0x63623461653364642d323532642d313165662d396534312d353235343030373338626236, 'PROLACTINA POOL', 'examen_tipo_2', 'PROLACTINA POOL', '135;208;159', '1.39 a 24.20 Ng/ml', '', 'Ng/ml', '2', '904109', 'PROLACTINA'),
+(60, '0086', 0x63623461653431392d323532642d313165662d396534312d353235343030373338626236, 'SODIO', 'examen_tipo_1', 'SODIO', '175;143;237', '136 a 145 mmol/l', '', 'mmol/l', '1', '903864', 'SODIO'),
+(61, '0087', 0x63623461653435332d323532642d313165662d396534312d353235343030373338626236, 'FOSFORO', 'examen_tipo_1', 'FOSFORO', '207;142;239', '2.7  a  4.5 mg/dl', '', 'mg/dl', '1', '903835', 'FOSFORO'),
+(62, '0088', 0x63623461653438662d323532642d313165662d396534312d353235343030373338626236, 'POTASIO', 'examen_tipo_1', 'POTASIO', '218;171;193', '3.5 a 5.10 mmol/l', '', 'mmol/l', '1', '903859', 'POTASIO'),
+(63, '0089', 0x63623461653463392d323532642d313165662d396534312d353235343030373338626236, 'CALCIO', 'examen_tipo_1', 'CALCIO', '160;170;127', '8.6 - 10.2', '', 'mg/dl', '1', '903603', 'CALCIO'),
+(64, '0090', 0x63623461653530382d323532642d313165662d396534312d353235343030373338626236, 'DESHIDROGENASA LACTICA DHL', 'examen_tipo_1', 'DESHIDROGENASA LACTICA DHL', '227;232;224', 'H135-225  M 135-214', '', 'U/L', '1', '903828', 'DESHIDROGENASA LACTICA DHL'),
+(65, '0091', 0x63623461653534342d323532642d313165662d396534312d353235343030373338626236, 'CARBAMAZEPINA', 'examen_tipo_1', 'CARBAMAZEPINA', '168;171;156', ': 4 a 12 Ug/ml', '', 'ml', '1', '905206', 'CARBAMAZEPINA'),
+(66, '0092', 0x63623461653538312d323532642d313165662d396534312d353235343030373338626236, 'COOMBS INDIRECTO, PRUEBA CUALITATIVA', 'examen_tipo_1', 'COOMBS INDIRECTO, PRUEBA CUALITATIVA', '210;101;151', '', '', '', '1', '902202', 'COOMBS INDIRECTO. CUALITATIVA'),
+(67, '0093', 0x63623461653562652d323532642d313165662d396534312d353235343030373338626236, 'GAMMA GLUTAMIL TRANSFERASA', 'examen_tipo_1', 'GAMMA GLUTAMIL TRANSFERASA', '237;222;145', '15.0 -  73.0', '', 'U/L', '1', '903838', 'GAMMA GLUTAMIL TRANSPEPTIDA'),
+(68, '0094', 0x63623461653566612d323532642d313165662d396534312d353235343030373338626236, 'ANTICUERPOS ANTINUCLEARES CELULARES HEP2', 'examen_tipo_1', 'ANTICUERPOS ANTINUCLEARES CELULARES HEP2', '135;167;175', 'NO REACTIVO', '', '', '1', '906442', 'ANTICUERPOS ANTINUCLEARES CELULARES HEP2'),
+(69, '0095', 0x63623461653633352d323532642d313165662d396534312d353235343030373338626236, 'FTA-ABS TREPONEMA', 'examen_tipo_1', 'FTA-ABS TREPONEMA', '121;134;180', '', '', '', '1', '906039', 'FTA-ABS TREPONEMA'),
+(70, '0096', 0x63623461653637302d323532642d313165662d396534312d353235343030373338626236, 'COMPLEMENTO SERICO C3', 'examen_tipo_1', 'COMPLEMENTO SERICO C3', '219;127;146', '115 a 150 mg/dl', '', 'mg/dl', '1', '906905', 'COMPLEMENTO SERICO C3'),
+(71, '0097', 0x63623461653661622d323532642d313165662d396534312d353235343030373338626236, 'CORTISOL', 'examen_tipo_1', 'CORTISOL', '248;247;236', '5 A 25 Ug/dl', '', '', '1', '904805', 'CORTISOL'),
+(72, '0098', 0x63623461653665632d323532642d313165662d396534312d353235343030373338626236, 'COMPLEMENTO SERICO C4', 'examen_tipo_1', 'COMPLEMENTO SERICO C4', '185;217;110', '20  a 50 mg/dl', '', 'mg/dl', '1', '906907', 'COMPLEMENTO SERICO C4'),
+(73, '0099', 0x63623461653732372d323532642d313165662d396534312d353235343030373338626236, 'SANGRE OCULTA EN MATERIA FECAL', 'examen_tipo_1', 'SANGRE OCULTA EN MATERIA FECAL', '206;209;172', '', '', '', '1', '907008', 'SANGRE OCULTA EN MATERIA FECAL'),
+(74, '0100', 0x63623461653736332d323532642d313165662d396534312d353235343030373338626236, 'ANTICUERPOS CONTRA EL ANTIGENO A (HAVAB)', 'examen_tipo_1', 'ANTICUERPOS CONTRA EL ANTIGENO A (HAVAB)', '232;135;233', '', '', '', '1', '', 'ANTICUERPOS CONTRA EL ANTIGENO A (HAVAB)'),
+(75, '0101', 0x63623461653761332d323532642d313165662d396534312d353235343030373338626236, 'HEPATITIS B, AG DE SUPERFICIE (AG HBS)', 'examen_tipo_2', 'HEPATITIS B, AG DE SUPERFICIE (AG HBS)', '249;122;203', '', '', '', '2', '906317', 'HEPATITIS B, AG DE SUPERFICIE'),
+(76, '0102', 0x63623461653930342d323532642d313165662d396534312d353235343030373338626236, 'ANTICUERPOS ANTIRUBEOLA', 'examen_tipo_2', 'ANTICUERPOS ANTIRUBEOLA', '141;156;126', '', '', '', '2', '906241', 'ANTICUERPOS ANTIRUBEOLA'),
+(77, '0103', 0x63623461653934622d323532642d313165662d396534312d353235343030373338626236, 'TOXOPLASMA IG M', 'examen_tipo_2', 'TOXOPLASMA IG M', '195;148;138', '', '', '', '2', '906127', 'TOXOPLASMA IG M'),
+(78, '0104', 0x63623461653939312d323532642d313165662d396534312d353235343030373338626236, 'PROGESTERONA', 'examen_tipo_2', 'PROGESTERONA', '147;200;101', '', '', '', '2', '904510', 'PROGESTERONA'),
+(79, '0105', 0x63623461653964322d323532642d313165662d396534312d353235343030373338626236, 'HIV1/HIV2 G RECOMB. TERCERA GENER.', 'examen_tipo_1', 'HIV1/HIV2 G RECOMB. TERCERA GENER.', '175;163;248', 'No R.valor inf.a 1.00', '', '', '1', '906249', 'HIV1/HIV2 G RECOMBINANTE TERCERA GENERACION'),
+(80, '0106', 0x63623461656131342d323532642d313165662d396534312d353235343030373338626236, 'LITIO', 'examen_tipo_1', 'LITIO', '165;149;165', ': 0.5 a 1.5 mEq/l', '', 'mEq/l', '1', '905313', 'LITIO'),
+(81, '0107', 0x63623461656135302d323532642d313165662d396534312d353235343030373338626236, 'EPAMIN', 'examen_tipo_1', 'EPAMIN', '144;177;161', ': 10  a 20 ug/ml', '', 'Ug/dl', '1', '905213', 'EPAMIN'),
+(82, '0108', 0x000000000000000000000000000000000000000000000000000000000000000000000000, 'ANTIGENO PROSTATICO ESPECIFICO', 'examen_tipo_2', 'ANTIGENO PROSTATICO ESPECIFICO', '166;156;224', 'Hasta 4.0 ng/ml', '', 'ng/mL', '2', '906610', 'ANTIGENO PROSTATICO ESPECIFICO'),
+(83, '0109', 0x63623461656163322d323532642d313165662d396534312d353235343030373338626236, 'ANTIGENO CARCINOEMBRIONARIO', 'examen_tipo_2', 'ANTIGENO CARCINOEMBRIONARIO', '145;213;145', '', '<table border="1">   <thead>     <tr>       <th>Clasificación</th>       <th>Valor de Referencia (ng/mL)</th>     </tr>   </thead>   <tbody>     <tr>       <td>Fumadores</td>       <td>Menor a 10 ng/mL</td>     </tr>     <tr>       <td>No Fumadores</td>       <td>Menor a 5.0 ng/mL</td>     </tr>   </tbody> </table>', '', '2', '906603', 'ANTIGENO CARCINOEMBRIONARIO'),
+(84, '0110', 0x63623461656166642d323532642d313165662d396534312d353235343030373338626236, 'LIPASA', 'examen_tipo_1', 'LIPASA', '246;239;202', 'TA 190 U/L', '', 'U/L', '1', '903847', 'LIPASA'),
+(85, '0111', 0x63623461656233612d323532642d313165662d396534312d353235343030373338626236, 'MONOTEST', 'examen_tipo_1', 'MONOTEST', '124;162;138', '', '', '', '1', '', 'MONOTEST'),
+(86, '0112', 0x63623461656237362d323532642d313165662d396534312d353235343030373338626236, 'HORMONA FOLICULO ESTIMULANTE (FSH)', 'examen_tipo_2', 'HORMONA FOLICULO ESTIMULANTE (FSH)', '177;223;224', '', '<table border="1">   <thead>     <tr>       <th>Clasificación</th>       <th>Rango (mIU/mL)</th>     </tr>   </thead>   <tbody>     <tr>       <td>Fase Folicular</td>       <td>3.20 - 15.0</td>     </tr>     <tr>       <td>Máximo Mitral del Ciclo</td>       <td>7.50 - 20.0</td>     </tr>     <tr>       <td>Fase Lútea</td>       <td>1.30 - 11.0</td>     </tr>     <tr>       <td>Postmenopausia</td>       <td>36.0 - 138</td>     </tr>     <tr>       <td>Anticonceptivos Orales</td>       <td>ND - 4.9</td>     </tr>     <tr>       <td>Niñas 4 - 7 Años</td>       <td>0.31 - 4.84</td>     </tr>     <tr>       <td>Niñas 7 - 10 Años</td>       <td>0.08 - 3.65</td>     </tr>     <tr>       <td>Niñas 10 - 14 Años</td>       <td>0.40 - 7.54</td>     </tr>     <tr>       <td>Hombres Antes de la Pubertad</td>       <td>0 - 5.0</td>     </tr>     <tr>       <td>Hombres Durante la Pubertad</td>       <td>0.3 - 10</td>     </tr>     <tr>       <td>Hombres Adultos</td>       <td>1.27 - 19.3</td>     </tr>   </tbody> </table>', '', '2', '904105', 'HORMONA FOLICULO ESTIMULANTE (FSH)'),
+(87, '0113', 0x63623461656261662d323532642d313165662d396534312d353235343030373338626236, 'MAGNESIO', 'examen_tipo_1', 'MAGNESIO', '194;125;141', '1.7  A 2.4 Mg/dl', '', 'mg/dl', '1', '903854', 'MAGNESIO'),
+(88, '0114', 0x63623461656265392d323532642d313165662d396534312d353235343030373338626236, 'ANTIGENO PROSTATICO ESPECIFICO LIBRE', 'examen_tipo_2', 'ANTIGENO PROSTATICO ESPECIFICO LIBRE', '141;173;151', '', '', '', '2', '906611', 'ANTIGENO PROSTATICO ESPECIFICO LIBRE'),
+(89, '0115', 0x63623461656332322d323532642d313165662d396534312d353235343030373338626236, 'FERRITINA', 'examen_tipo_1', 'FERRITINA', '234;208;150', 'H21-274  M 4.6-204', '', 'ng/ml', '1', '903016', 'FERRITINA'),
+(90, '0116', 0x63623461656335622d323532642d313165662d396534312d353235343030373338626236, 'HORMONA LUTEINIZANTE (LH)', 'examen_tipo_2', 'HORMONA LUTEINIZANTE (LH)', '127;234;109', '', '<table border="1">   <thead>     <tr>       <th>Clasificación</th>       <th>Rango (mIU/mL)</th>     </tr>   </thead>   <tbody>        <tr>       <td>Fase Folicular</td>       <td>1.20 - 12.5</td>     </tr>     <tr>       <td>Fase Ovulatoria</td>       <td>12.0 - 82.0</td>     </tr>     <tr>       <td>Fase Lútea</td>       <td>0.40 - 19.0</td>     </tr>     <tr>       <td>Postmenopausia</td>       <td>14.0 - 48.0</td>     </tr>     <tr>       <td>Anticonceptivos Orales</td>       <td>ND - 8.0</td>     </tr>     <tr>       <td>Hombres</td>       <td>0.8 - 7.6</td>     </tr>     <tr>       <td>Niñas 4 - 7 Años</td>       <td>ND - 0.53</td>     </tr>     <tr>       <td>Niñas 7 - 10 Años</td>       <td>ND - 0.69</td>     </tr>     <tr>       <td>Niñas 10 - 14 Años</td>       <td>ND - 6.41</td>     </tr>   </tbody> </table>', '', '2', '904107', 'HORMONA LUTEINIZANTE (LH)'),
+(91, '0117', 0x63623461656339332d323532642d313165662d396534312d353235343030373338626236, 'ACIDO VALPROICO', 'examen_tipo_1', 'ACIDO VALPROICO', '138;133;253', '50 A 100 Ug/ml', '', 'Ug/dl', '1', '905201', 'ACIDO VALPROICO'),
+(92, '0118', 0x63623461656363662d323532642d313165662d396534312d353235343030373338626236, 'FENITOINA TOTAL', 'examen_tipo_1', 'FENITOINA TOTAL', '160;246;170', '0  A 40', '', 'Ug/dl', '1', '905213', 'FENITOINA TOTAL'),
+(93, '0119', 0x63623461656430352d323532642d313165662d396534312d353235343030373338626236, 'ESTRADIOL', 'examen_tipo_2', 'ESTRADIOL', '167;127;146', '', '', '', '2', '904503', 'ESTRADIOL'),
+(94, '0120', 0x63623461656433632d323532642d313165662d396534312d353235343030373338626236, 'SANGRE OCULTA SERIADA # 3', 'examen_tipo_1', 'SANGRE OCULTA SERIADA # 3', '153;254;240', '', '', '', '1', '', 'SANGRE OCULTA SERIADA # 3'),
+(95, '0300', 0x63623461656461302d323532642d313165662d396534312d353235343030373338626236, 'BACILOSCOPIA', 'examen_tipo_2', 'BACILOSCOPIA', '184;200;194', '', '', '', '2', '901101', 'BACILOSCOPIA'),
+(96, '0302', 0x63623461656465302d323532642d313165662d396534312d353235343030373338626236, 'BACILOSCOPIA SERIADA', 'examen_tipo_2', 'BACILOSCOPIA SERIADA', '169;244;168', '', '', '', '2', '901101', 'BACILOSCOPIA SERIADA'),
+(97, '0305', 0x63623461656531642d323532642d313165662d396534312d353235343030373338626236, 'ESPERMOGRAMA', 'examen_tipo_2', 'ESPERMOGRAMA', '153;162;247', '', '', '', '2', '907201', 'ESPERMOGRAMA'),
+(98, '0313', 0x63623461656535372d323532642d313165662d396534312d353235343030373338626236, 'FROTIS VAGINAL', '', '0', '163;144;135', '', '', '', '6', '901304', 'FLUJO VAGINAL'),
+(99, '0312', 0x63623461656539332d323532642d313165662d396534312d353235343030373338626236, 'COLORACION DE GRAM', 'examen_tipo_2', 'COLORACION DE GRAM', '198;145;123', '', '', '', '2', '901107', 'COLORACION DE GRAM'),
+(101, '0320', 0x63623461656563622d323532642d313165662d396534312d353235343030373338626236, 'FROTIS RECTAL', 'examen_tipo_2', 'FROTIS RECTAL', '105;179;162', '', '', '', '2', '907005', 'FROTIS RECTAL'),
+(102, '0322', 0x63623461656630322d323532642d313165662d396534312d353235343030373338626236, 'OXIUROS FROTIS', 'examen_tipo_1', 'OXIUROS FROTIS', '232;154;100', '', '', '', '1', '907007', 'OXIUROS FROTIS'),
+(103, '0330', 0x63623461656633622d323532642d313165662d396534312d353235343030373338626236, 'FROTIS FARINGEO', 'examen_tipo_2', 'FROTIS FARINGEO', '247;214;145', '', '', '', '2', '901107', 'FROTIS FARINGEO'),
+(104, '0340', 0x63623461656637352d323532642d313165662d396534312d353235343030373338626236, 'PRUEBA DE TOLERANCIA A LA GLUCOSA', 'examen_tipo_2', 'PRUEBA DE TOLERANCIA A LA GLUCOSA', '240;211;148', '', '', '', '2', '903844', 'PRUEBA DE TOLERANCIA A LA GLUCOSA'),
+(105, '0350', 0x63623461656662342d323532642d313165662d396534312d353235343030373338626236, 'HEMOPARASITOS', 'examen_tipo_2', 'HEMOPARASITOS', '113;128;137', '', '', '', '2', '902214', 'HEMOPARASITOS'),
+(106, '0360', 0x63623461656666302d323532642d313165662d396534312d353235343030373338626236, 'HEMOCLASIFICACION', 'examen_tipo_2', 'HEMOCLASIFICACION', '178;196;190', '', '', '', '2', '902212', 'HEMOCLASIFICACION'),
+(107, '0370', 0x63623461663032392d323532642d313165662d396534312d353235343030373338626236, 'HONGOS KOH', 'examen_tipo_2', 'HONGOS KOH', '164;214;246', '', '', '', '2', '901305', 'HONGOS KOH'),
+(108, '0380', 0x63623461663036382d323532642d313165662d396534312d353235343030373338626236, 'SEROAGLUTINACIONES ANTIGENOS FEBRILES', 'examen_tipo_2', 'SEROAGLUTINACIONES ANTIGENOS FEBRILES', '144;144;244', '', '', '', '2', '906304', 'SEROAGLUTINACIONES ANTIGENOS FEBRILES'),
+(109, '0390', 0x63623461663061362d323532642d313165662d396534312d353235343030373338626236, 'SECRECION URETRAL', 'examen_tipo_2', 'SECRECION URETRAL', '112;139;174', '', '', '', '2', '901107', 'SECRECION URETRAL'),
+(110, '0395', 0x63623461663065322d323532642d313165662d396534312d353235343030373338626236, 'SECRECION OCULAR', 'examen_tipo_2', 'SECRECION OCULAR', '193;155;129', '', '', '', '2', '901107', 'SECRECION OCULAR'),
+(111, '0400', 0x63623461663131632d323532642d313165662d396534312d353235343030373338626236, 'UROCULTIVO RCTO ANTIBIOG.', 'examen_tipo_2', 'UROCULTIVO RCTO ANTIBIOG.', '192;192;192', '', '', '', '2', '901235', 'UROCULTIVO'),
+(114, '0420', 0x63623461663135392d323532642d313165662d396534312d353235343030373338626236, 'CULTIVO DE SECRECIONES', 'examen_tipo_2', 'CULTIVO DE SECRECIONES', '161;159;186', '', '', '', '2', '', 'CULTIVO DE SECRECIONES'),
+(115, '0430', 0x63623461663139352d323532642d313165662d396534312d353235343030373338626236, 'T3 TOTALTRIYODOTIRONINA TOTAL', 'examen_tipo_2', 'T3 TOTALTRIYODOTIRONINA TOTAL', '128;149;116', '0.8-2.0 ng/mL', '', 'ng/mL', '2', '904925', 'T3 TOTALTRIYODOTIRONINA TOTAL'),
+(116, '0431', 0x000000000000000000000000000000000000000000000000000000000000000000000000, 'T4 TOTAL TIROXINA TOTAL', 'examen_tipo_2', 'T4 TOTAL TIROXINA TOTAL', '142;173;178', '5.1-14 ug/dL', '<table border="1">   <thead>     <tr>       <th>Edad</th>       <th>Rango (µg/dL)</th>     </tr>   </thead>   <tbody>     <tr>       <td>1 a 3 Años</td>       <td>6.05 - 14.1 µg/dL</td>     </tr>     <tr>       <td>3 a 6 Años</td>       <td>5.91 - 11.5 µg/dL</td>     </tr>     <tr>       <td>6 a 12 Años</td>       <td>4.81 - 12.5 µg/dL</td>     </tr>     <tr>       <td>12 a 18 Años</td>       <td>5.31 - 10.2 µg/dL</td>     </tr>     <tr>       <td>Adultos</td>       <td>4.50 - 12.5 µg/dL</td>     </tr>   </tbody> </table>', 'ug/dL', '2', '904922', 'T4 TOTAL TIROXINA TOTAL'),
+(117, '0432', 0x63623461663230652d323532642d313165662d396534312d353235343030373338626236, 'T.S.H', 'examen_tipo_2', 'T.S.H', '110;137;254', '0.3-4.2 mlU/L', '', 'mlU/L', '2', '904902', 'T.S.H'),
+(118, '0433', 0x63623461663234372d323532642d313165662d396534312d353235343030373338626236, 'T.S.H  NEONATAL', 'examen_tipo_2', 'T.S.H  NEONATAL', '139;146;184', '', '', '', '2', '904903', 'T.S.H  NEONATAL'),
+(119, '0434', 0x000000000000000000000000000000000000000000000000000000000000000000000000, 'T-3 LIBRE TRIYODOTIRONINA LIBRE', 'examen_tipo_2', 'T-3 LIBRE TRIYODOTIRONINA LIBRE', '182;163;229', '1.8 - 4.2 pg/ml', '', 'Pg/mL', '2', '904924', 'T-3 LIBRE TRIYODOTIRONINA LIBRE'),
+(120, '0435', 0x000000000000000000000000000000000000000000000000000000000000000000000000, 'T-4  LIBRE. TIROXINA LIBRE', 'examen_tipo_2', 'T-4  LIBRE. TIROXINA LIBRE', '141;167;172', '0.93-1.71 ng/dL', '<table border="1">   <thead>     <tr>       <th>Edad</th>       <th>Rango (ng/dL)</th>     </tr>   </thead>   <tbody>     <tr>       <td>1 a 3 Años</td>       <td>0.804 - 1.79 ng/dL</td>     </tr>     <tr>       <td>3 a 6 Años</td>       <td>0.947 - 1.79 ng/dL</td>     </tr>     <tr>       <td>6 a 12 Años</td>       <td>0.936 - 1.92 ng/dL</td>     </tr>     <tr>       <td>12 a 18 Años</td>       <td>0.99 - 1.59 ng/dL</td>     </tr>     <tr>       <td>Adultos</td>       <td>0.89 - 1.72 ng/dL</td>     </tr>   </tbody> </table>', 'ng/dL', '2', '904921', 'T-4  LIBRE. TIROXINA LIBRE'),
+(121, '0440', 0x63623461663266622d323532642d313165662d396534312d353235343030373338626236, 'DEPURACION DE CREATININA', 'examen_tipo_1', 'DEPURACION DE CREATININA', '156;165;101', '70 A 140 ML/minuto', '', 'ml/min', '1', '903823', 'DEPURACION DE CREATININA'),
+(122, '0460', 0x63623461663333372d323532642d313165662d396534312d353235343030373338626236, 'EXTENDIDO SANGRE PERIFERICA', 'examen_tipo_2', 'EXTENDIDO SANGRE PERIFERICA', '204;246;165', '', '', '', '2', '902206', 'EXTENDIDO SANGRE PERIFERICA'),
+(123, '0470', 0x63623461663337352d323532642d313165662d396534312d353235343030373338626236, 'INMUNOGLOBULINA E', 'examen_tipo_2', 'INMUNOGLOBULINA E', '134;212;177', '', '<table border="1">   <thead>     <tr>       <th>Edad</th>       <th>Valor de Referencia (IU/mL)</th>     </tr>   </thead>   <tbody>     <tr>       <td>0 - 1 Años</td>       <td>Hasta 29 IU/mL</td>     </tr>     <tr>       <td>1 - 2 Años</td>       <td>Hasta 49 IU/mL</td>     </tr>     <tr>       <td>2 - 3 Años</td>       <td>Hasta 45 IU/mL</td>     </tr>     <tr>       <td>3 - 9 Años</td>       <td>Hasta 52 IU/mL</td>     </tr>     <tr>       <td>Adultos</td>       <td>Hasta 87 IU/mL</td>     </tr>   </tbody> </table>', '', '2', '906835', 'INMUNOGLOBULINA E'),
+(124, '0472', 0x63623461663362302d323532642d313165662d396534312d353235343030373338626236, 'INMUNOGLOBULINA A', 'examen_tipo_1', 'INMUNOGLOBULINA A', '253;172;154', '184 a 253   mg/dl', '', 'mg/dl', '1', '906827', 'INMUNOGLOBULINA A'),
+(125, '0480', 0x63623461663365652d323532642d313165662d396534312d353235343030373338626236, 'PROTEINAS EN ORINA 24 HORAS', 'examen_tipo_1', 'PROTEINAS EN ORINA 24 HORAS', '157;202;217', '30 a 140 mg/24', '', 'mg/24 Horas', '1', '903862', 'PROTEINAS EN ORINA 24 HORAS'),
+(126, '0490', 0x63623461663432382d323532642d313165662d396534312d353235343030373338626236, 'VARIOS', 'examen_tipo_2', 'VARIOS', '223;209;174', '', '', '', '2', '', 'VARIOS'),
+(127, '0500', 0x63623461663436352d323532642d313165662d396534312d353235343030373338626236, 'LIQUIDO CEFALORRAQUIDEO', 'examen_tipo_2', 'LIQUIDO CEFALORRAQUIDEO', '242;146;170', '', '', '', '2', '', 'LIQUIDO CEFALORRAQUIDEO'),
+(128, '1000', 0x63623461663461342d323532642d313165662d396534312d353235343030373338626236, 'PARCIAL DE ORINA', 'parcialOrina', 'Parcial de Orina', '247;239;200', '', '', '', '3', '907106', 'PARCIAL DE ORINA'),
+(129, '2000', 0x63623461663464662d323532642d313165662d396534312d353235343030373338626236, 'COPROLOGICO 1', 'coprologico', 'Examen Coprológico', '228;192;113', '', '', '', '4', '907002', 'COPROLOGICO 1'),
+(130, '2002', 0x63623461663531612d323532642d313165662d396534312d353235343030373338626236, 'COPROLOGICO 2', 'coprologico', 'Examen Coprológico', '129;171;201', '', '', '', '4', '907002', 'COPROLOGICO 2'),
+(131, '2003', 0x63623461663535362d323532642d313165662d396534312d353235343030373338626236, 'COPROLOGICO 3', 'coprologico', 'Examen Coprológico', '237;142;152', '', '', '', '4', '907002', 'COPROLOGICO 3'),
+(132, '2004', 0x63623461663539352d323532642d313165662d396534312d353235343030373338626236, 'COPROSCOPICO AZUCARES Y PARASITOS', 'coprologico', 'Examen Coprológico', '123;243;149', '', '', '', '4', '907004', 'COPROSCOPICO AZUCARES Y PARASITOS'),
+(133, '2006', 0x63623461663564342d323532642d313165662d396534312d353235343030373338626236, 'AZUCARES REDUCTORES', 'examen_tipo_2', 'AZUCARES REDUCTORES', '186;178;148', '', '', '', '2', '907001', 'AZUCARES REDUCTORES'),
+(134, '3000', 0x63623461663630662d323532642d313165662d396534312d353235343030373338626236, 'CUADRO HEMATICO COMPLETO', 'hemogramaRayto', 'Hemograma Sistematizado', '250;207;207', '', '[
+  {
+    "parametro": "WBC",
+    "nombre": "White Blood Cells (Leucocitos)",
+    "valorReferencia": "4.0 - 11.0 x10³/µL"
+  },
+  {
+    "parametro": "LYMn",
+    "nombre": "Lymphocytes Absolute (Linfocitos absolutos)",
+    "valorReferencia": "1.0 - 4.0 x10³/µL"
+  },
+  {
+    "parametro": "MIDn",
+    "nombre": "Mid-range Cells Absolute (Células intermedias)",
+    "valorReferencia": "0.1 - 1.0 x10³/µL"
+  },
+  {
+    "parametro": "GRAn",
+    "nombre": "Granulocytes Absolute (Granulocitos absolutos)",
+    "valorReferencia": "2.0 - 7.5 x10³/µL"
+  },
+  {
+    "parametro": "LYMp",
+    "nombre": "Lymphocytes Percentage (% Linfocitos)",
+    "valorReferencia": "20 - 40%"
+  },
+  {
+    "parametro": "MIDp",
+    "nombre": "Mid-range Cells Percentage (% Células intermedias)",
+    "valorReferencia": "2 - 10%"
+  },
+  {
+    "parametro": "GRAp",
+    "nombre": "Granulocytes Percentage (% Granulocitos)",
+    "valorReferencia": "40 - 75%"
+  },
+  {
+    "parametro": "RBC",
+    "nombre": "Red Blood Cells (Eritrocitos/Glóbulos rojos)",
+    "valorReferencia": "H: 4.5-6.0 / M: 4.0-5.5 x10⁶/µL"
+  },
+  {
+    "parametro": "HGB",
+    "nombre": "Hemoglobin (Hemoglobina)",
+    "valorReferencia": "H: 13.5-17.5 / M: 12.0-15.5 g/dL"
+  },
+  {
+    "parametro": "MCHC",
+    "nombre": "Mean Corpuscular Hemoglobin Concentration",
+    "valorReferencia": "32 - 36 g/dL"
+  },
+  {
+    "parametro": "MCH",
+    "nombre": "Mean Corpuscular Hemoglobin (Hemoglobina corpuscular media)",
+    "valorReferencia": "27 - 33 pg"
+  },
+  {
+    "parametro": "MCV",
+    "nombre": "Mean Corpuscular Volume (Volumen corpuscular medio)",
+    "valorReferencia": "80 - 100 fL"
+  },
+  {
+    "parametro": "RDWCV",
+    "nombre": "Red Cell Distribution Width, Coeff. of Var. (Ancho de distribución de glóbulos rojos)",
+    "valorReferencia": "11.5 - 14.5 %"
+  },
+  {
+    "parametro": "RDWSD",
+    "nombre": "Red Cell Distribution Width, Std. Dev. (Desviación estándar de ancho de distribución de glóbulos rojos)",
+    "valorReferencia": "35 - 56 fL"
+  },
+  {
+    "parametro": "HCT",
+    "nombre": "Hematocrit (Hematocrito)",
+    "valorReferencia": "H: 40 - 52 / M: 36 - 48 %"
+  },
+  {
+    "parametro": "PLT",
+    "nombre": "Platelet Count (Plaquetas)",
+    "valorReferencia": "150 - 450 x10³/µL"
+  },
+  {
+    "parametro": "MPV",
+    "nombre": "Mean Platelet Volume (Volumen plaquetario medio)",
+    "valorReferencia": "7.4 - 10.4 fL"
+  },
+  {
+    "parametro": "PDW",
+    "nombre": "Platelet Distribution Width (Ancho de distribución plaquetaria)",
+    "valorReferencia": "9.0 - 17.0 %"
+  },
+  {
+    "parametro": "PCT",
+    "nombre": "Plateletcrit (Plaquetocrito)",
+    "valorReferencia": "0.150 - 0.400 %"
+  },
+  {
+    "parametro": "PLCR",
+    "nombre": "Platelet-Large Cell Ratio (Relación de plaquetas grandes)",
+    "valorReferencia": "0.150 - 0.400 %"
+  }
+]', 'N/A', '8', '902203', 'CUADRO HEMATICO'),
+(136, '0049', 0x63623461663637332d323532642d313165662d396534312d353235343030373338626236, 'RETICULOCITOS', 'examen_tipo_1', 'RETICULOCITOS', '128;145;127', '0.5  a   2.5  %', '', '', '1', '902223', 'RETICULOCITOS'),
+(137, '0035', 0x000000000000000000000000000000000000000000000000000000000000000000000000, 'GLUCOMETRIA', 'examen_tipo_1', 'GLUCOMETRIA', '215;252;199', '60-99 mg/dl', '', 'mg/dl ', '1', '', 'GLUCOMETRIA'),
+(138, '4001', 0x63623461663665662d323532642d313165662d396534312d353235343030373338626236, 'DOMICILIO', 'examen_tipo_2', 'DOMICILIO', '224;247;254', '', '', '', '2', '', 'DOMICILIO'),
+(139, '4002', 0x63623461663732622d323532642d313165662d396534312d353235343030373338626236, 'TRANSPORTE', 'examen_tipo_2', 'TRANSPORTE', '244;254;224', '', '', '', '2', '', 'TRANSPORTE'),
+(140, '0034A', 0x63623461663736622d323532642d313165662d396534312d353235343030373338626236, 'PERFIL LIPIDICO', 'perfilLipidico', 'Perfil Lipídico', '203;201;252', 'C.TOTAL : <200  mg/dl        C.HDL : >35  mg/dl   ', '[   {     "dato": "Colesterol total",     "valor_recomendado": "< 200 mg/dL"   },   {     "dato": "Colesterol HDL",     "valor_recomendado": "> 40 mg/dL (hombres) / > 50 mg/dL (mujeres)"   },   {     "dato": "Colesterol VLDL",     "valor_recomendado": "< 30 mg/dL"   },   {     "dato": "Colesterol LDL",     "valor_recomendado": "< 100 mg/dL"   },   {     "dato": "Trigliceridos",     "valor_recomendado": "< 150 mg/dL"   } ]', 'mg/dl ', '8', '', 'PERFIL LIPIDICO'),
+(142, '0038', 0x63623461663761382d323532642d313165662d396534312d353235343030373338626236, 'GLICEMIA BASAL', 'examen_tipo_1', 'GLICEMIA BASAL', '101;157;98', '65 a 99 mg/dl', '', 'mg/dl', '1', '903841', 'GLICEMIA BASAL'),
+(143, '0030', 0x000000000000000000000000000000000000000000000000000000000000000000000000, 'TRIGLICERIDOS', 'examen_tipo_1', 'TRIGLICERIDOS', '255;209;164', 'Menor de 150 mg/dl', '', 'mg/dl', '1', '903868', 'TRIGLICERIDOS'),
+(144, '0003', 0x63623461663832362d323532642d313165662d396534312d353235343030373338626236, 'ACIDO URICO MUJER', 'examen_tipo_1', 'ACIDO URICO MUJER', '232;251;196', '2.5 - 7.7', '', 'mg/dl', '1', '903801', 'ACIDO URICO MUJER'),
+(145, '0009', 0x63623461663836352d323532642d313165662d396534312d353235343030373338626236, 'AMILASAS', 'examen_tipo_1', 'AMILASAS', '207;252;239', 'HASTA 120', '', 'U/DL', '1', '903805', 'AMILASAS'),
+(146, '0026', 0x63623461663861342d323532642d313165662d396534312d353235343030373338626236, 'COLESTEROL LDL', 'examen_tipo_1', 'COLESTEROL LDL', '239;249;202', 'Menor de 130 mg/dl', '', 'mg/dl', '1', '903816', 'COLESTEROL LDL'),
+(147, '0036', 0x63623461663865302d323532642d313165662d396534312d353235343030373338626236, 'RECUENTO DE PLAQUETAS', 'examen_tipo_1', 'RECUENTO DE PLAQUETAS', '252;238;197', '150.000 A 400.000 x mmc', '', 'xmmc', '1', '902221', 'RECUENTO DE PLAQUETAS'),
+(148, '0039', 0x63623461663931622d323532642d313165662d396534312d353235343030373338626236, 'GLICEMIA POSTPRANDIAL', 'examen_tipo_1', 'GLICEMIA POSTPRANDIAL', '231;253;227', '', '', 'mg/dl', '1', '903843', 'GLICEMIA POSTPRANDIAL'),
+(149, '0040', 0x63623461663935632d323532642d313165662d396534312d353235343030373338626236, 'NITROGENO UREICO', 'examen_tipo_1', 'NITROGENO UREICO', '203;254;252', 'De 7 a 18 mg/dl', '', 'mg/dl', '1', '903856', 'NITROGENO UREICO'),
+(150, '0041', 0x63623461663939362d323532642d313165662d396534312d353235343030373338626236, 'UREA TOTAL', 'examen_tipo_1', 'UREA TOTAL', '254;235;231', '15 a 39 mg/dl', '', 'mg/dl', '1', '903869', 'UREA TOTAL'),
+(151, '0121', 0x63623461663964322d323532642d313165662d396534312d353235343030373338626236, 'CALCIO  IONICO', 'examen_tipo_1', 'CALCIO  IONICO', '128;128;192', '1.12 a 1.32 mmol/l', '', 'mmol/l', '1', '903604', 'CALCIO IONICO'),
+(152, '0133', 0x63623461666162622d323532642d313165662d396534312d353235343030373338626236, 'ANTICUERPOS NUCLEARES EXTRACTABLES (ENAS)', 'examen_tipo_2', 'ANTICUERPOS NUCLEARES EXTRACTABLES (ENAS)', '00;255;255', '', '', '', '2', '906405', 'ENAS'),
+(153, '0134', 0x63623461666166632d323532642d313165662d396534312d353235343030373338626236, 'DEHIDROEPIANDROTERONA SULFATO DHEA SO4', 'examen_tipo_2', 'DEHIDROEPIANDROTERONA SULFATO DHEA SO4', '192;192;192', '', '', '', '2', '904809', 'DHEAS'),
+(154, '0135', 0x63623461666233642d323532642d313165662d396534312d353235343030373338626236, 'TESTOSTERONA LIBRE', 'examen_tipo_1', 'TESTOSTERONA LIBRE', '192;192;192', 'H:15.5 -102  M 0.38 -5.91', '', '%', '1', '904601', 'TESTOTERONA LIBRE'),
+(155, '0136', 0x63623461666237372d323532642d313165662d396534312d353235343030373338626236, 'TESTOSTERONA TOTAL', 'examen_tipo_2', 'TESTOSTERONA TOTAL', '192;192;192', 'H:9.9-27.8 M:0.20-2.90', '', 'mmol/Lt', '2', '904602', 'TESTOSTERONA TOTAL'),
+(156, '0137', 0x63623461666262322d323532642d313165662d396534312d353235343030373338626236, 'ANTIGENO DE CANCER DE MAMA (CA 14-3)', 'examen_tipo_2', 'ANTIGENO DE CANCER DE MAMA (CA 14-3)', '192;192;192', '', '', '', '2', '906604', 'CA 15-3'),
+(157, '0138', 0x63623461666266352d323532642d313165662d396534312d353235343030373338626236, 'ANTIGENO DE CANCER DE OVARIO CA 125', 'examen_tipo_1', 'ANTIGENO DE CANCER DE OVARIO CA 125', '192;192;192', 'Hasta  35  U/ml', '', 'U/ml', '1', '906605', 'CA 125'),
+(158, '0139', 0x63623461666333352d323532642d313165662d396534312d353235343030373338626236, 'ANTICUERPOS ANTITIROIDEOS TIROGLOBULINA', 'examen_tipo_1', 'ANTICUERPOS ANTITIROIDEOS TIROGLOBULINA', '64;128;128', 'Menor de 4', '', 'UI/ml', '1', '906465', 'ACS TIROGLOBULINICOS'),
+(160, '0033', 0x63623461666337312d323532642d313165662d396534312d353235343030373338626236, 'GLICEMIA TARDE', 'examen_tipo_1', 'GLICEMIA TARDE', '192;192;192', '', '', '', '1', '903841', 'GLICEMIA'),
+(161, '0122', 0x63623461666361662d323532642d313165662d396534312d353235343030373338626236, 'COOMBS DIRECTO', 'examen_tipo_1', 'COOMBS DIRECTO', '192;192;192', '', '', '', '1', '902201', 'COOMBS DIRECTO'),
+(162, '0123', 0x63623461666365612d323532642d313165662d396534312d353235343030373338626236, 'LEPTOSPIRA SEROTIPIFICACION', 'examen_tipo_2', 'LEPTOSPIRA SEROTIPIFICACION', '128;128;128', '', '', '', '2', '901311', 'LEPTOSPIRA'),
+(163, '0124', 0x63623461666432372d323532642d313165662d396534312d353235343030373338626236, 'HEPATITIS A, ACS IGM ( ANTI HVA-M)', 'examen_tipo_2', 'HEPATITIS A, ACS IGM ( ANTI HVA-M)', '128;128;128', '', '', '', '2', '906218', 'HEPATITIS'),
+(164, '0125', 0x63623461666435662d323532642d313165662d396534312d353235343030373338626236, 'HEPATITIS B, ANTICUERPOS  S (  ANTI-HBS)', 'examen_tipo_2', 'HEPATITIS B, ANTICUERPOS  S (  ANTI-HBS)', '128;128;128', '', '', '', '2', '906223', 'HEPATITIS'),
+(166, '0126', 0x63623461666439632d323532642d313165662d396534312d353235343030373338626236, 'TOXOPLASMA IG G', 'examen_tipo_2', 'TOXOPLASMA IG G', '128;128;255', '', '', '', '2', '906128', 'TOXOPLASMA IG G'),
+(167, '0127', 0x63623461666464362d323532642d313165662d396534312d353235343030373338626236, 'RUBEOLA ACS IG G', 'examen_tipo_2', 'RUBEOLA ACS IG G', '192;192;192', '', '', '', '2', '906242', 'RUBEOLA IG G'),
+(168, '0128', 0x63623461666531312d323532642d313165662d396534312d353235343030373338626236, 'RUBEOLA ACS IG M', 'examen_tipo_2', 'RUBEOLA ACS IG M', '192;192;192', '', '', '', '2', '906244', 'RUBEOLA IG M'),
+(169, '0129', 0x63623461666534652d323532642d313165662d396534312d353235343030373338626236, 'HERPES I   ACS  IG  G', 'examen_tipo_2', 'HERPES I   ACS  IG  G', '192;192;192', '', '', '', '2', '906228', 'HERPES I I G G'),
+(170, '0130', 0x63623461666539312d323532642d313165662d396534312d353235343030373338626236, 'HERPES I  ACS IG M', 'examen_tipo_2', 'HERPES I  ACS IG M', '192;192;192', '', '', '', '2', '906229', 'HERPES I IG M'),
+(171, '0131', 0x63623461666563662d323532642d313165662d396534312d353235343030373338626236, 'HERPES II  ACS  IG G', 'examen_tipo_2', 'HERPES II  ACS  IG G', '192;192;192', '', '', '', '2', '906230', 'HERPES II  IG G'),
+(172, '0132', 0x63623461666631342d323532642d313165662d396534312d353235343030373338626236, 'HERPES II  ACS  IG M', 'examen_tipo_2', 'HERPES II  ACS  IG M', '192;192;192', '', '', '', '2', '906231', 'HERPES II  IG  M'),
+(173, '0140', 0x63623461666635372d323532642d313165662d396534312d353235343030373338626236, 'CITOMEGALOVIRUS ACS IG G', 'examen_tipo_2', 'CITOMEGALOVIRUS ACS IG G', '192;192;192', '', '', '', '2', '936205', 'CITOM. ACS IG G'),
+(174, '0141', 0x63623461666639352d323532642d313165662d396534312d353235343030373338626236, 'CITOMEGALOVIRUS  ACS IG  M', 'examen_tipo_2', 'CITOMEGALOVIRUS  ACS IG  M', '192;192;192', '', '', '', '2', '906206', 'CITOM ACS IG M'),
+(175, '0142', 0x63623461666664342d323532642d313165662d396534312d353235343030373338626236, 'VITAMINA B 12', 'examen_tipo_2', 'VITAMINA B 12', '64;128;128', 'referencia 200 - 1100 pg/ml', '', '', '2', '903703', 'B 12'),
+(176, '0143', 0x63623462303031342d323532642d313165662d396534312d353235343030373338626236, 'ACIDO FOLICO', 'examen_tipo_2', 'ACIDO FOLICO', '64;128;128', '5.21 - 20.0 ng/ml', '', '', '2', '903105', 'AC FOLICO'),
+(177, '0144', 0x63623462303035322d323532642d313165662d396534312d353235343030373338626236, 'PROLACTINA BASAL', 'examen_tipo_2', 'PROLACTINA BASAL', '00;255;255', '', '<table border="1">
+  <thead>
+    <tr>
+      <th>Población</th>
+      <th>Valor de Referencia</th>
+      <th>Unidad</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Hombres</td>
+      <td>3.45 - 17.42</td>
+      <td>ng/mL</td>
+    </tr>
+    <tr>
+      <td>Mujeres no embarazadas</td>
+      <td>4.60 - 25.07</td>
+      <td>ng/mL</td>
+    </tr>
+  </tbody>
+</table>', 'ng/mL', '2', '904107', 'PROLACTINA'),
+(178, '0145', 0x63623462303039322d323532642d313165662d396534312d353235343030373338626236, 'CREATININA EN ORINA DE 24 H', 'examen_tipo_2', 'CREATININA EN ORINA DE 24 H', '128;128;255', '', '', '', '2', '903824', 'CREATININA'),
+(179, '0146', 0x63623462303064342d323532642d313165662d396534312d353235343030373338626236, 'MICROALBUMINURIA POR NEFELOMETRIA', 'examen_tipo_1', 'MICROALBUMINURIA POR NEFELOMETRIA', '64;128;128', 'Hasta 20 mg/L', '', 'mg/dl', '1', '903028', 'MICROALB'),
+(180, '0148', 0x63623462303131312d323532642d313165662d396534312d353235343030373338626236, 'FACTOR REUMATOIDEO CUANT.POR NEFELOMETRIA', 'examen_tipo_2', 'FACTOR REUMATOIDEO SEMICUANTITATIVO', '64;128;128', NULL, '<table border="1">
+  <thead>
+    <tr>
+      <th>Resultado</th>
+      <th>Valor de Referencia</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Negativo</td>
+      <td>&lt; 30 UI/mL</td>
+    </tr>
+    <tr>
+      <td>Positivo</td>
+      <td> +30 UI/mL</td>
+    </tr>
+  </tbody>
+</table>', 'UI/mL', '2', '906910', 'FACTOR AR'),
+(181, '0147', 0x63623462303134612d323532642d313165662d396534312d353235343030373338626236, 'PROTEINA C REACTIVA CUANT.ALTA PRESICION', 'examen_tipo_2', 'PROTEINA C REACTIVA CUANT.ALTA PRESICION', '64;128;128', '', '', '', '2', '906913', 'PROTEINA C R'),
+(182, '0149', 0x63623462303139312d323532642d313165662d396534312d353235343030373338626236, 'HEPATITIS C, ACS (ANTI HVC)', 'examen_tipo_2', 'HEPATITIS C, ACS (ANTI HVC)', '128;128;128', '', '', '', '2', '906225', 'HEPATITIS C'),
+(183, '0150', 0x63623462303164332d323532642d313165662d396534312d353235343030373338626236, 'CALCIO EN ORINA', 'examen_tipo_2', 'CALCIO EN ORINA', '64;128;128', '', '', '', '2', '903811', 'CALCIO'),
+(184, '0151', 0x63623462303231362d323532642d313165662d396534312d353235343030373338626236, 'HEPATITIS B, ACS CENTRAL IG M (ANTICORE HBC-M)', 'examen_tipo_2', 'HEPATITIS B, ACS CENTRAL IG M (ANTICORE HBC-M)', '128;128;128', '', '', '', '2', '906220', 'ANTICORE'),
+(185, '0152', 0x63623462303235372d323532642d313165662d396534312d353235343030373338626236, 'HEPATITIS B, ACS CENTRAL TOTALES (ANTICORE HBC)', 'examen_tipo_2', 'HEPATITIS B, ACS CENTRAL TOTALES (ANTICORE HBC)', '128;128;128', '', '', '', '2', '906221', 'ANTICORE TOTALES'),
+(186, '0153', 0x63623462303239342d323532642d313165662d396534312d353235343030373338626236, 'ANCA, ACS TOTALES CITOPLASMA NEUTROFILOS (C-ANCA O', 'examen_tipo_2', 'ANCA, ACS TOTALES CITOPLASMA NEUTROFILOS (C-ANCA O', '128;128;128', '', '', '', '2', '906415', 'ANCA'),
+(188, '0155', 0x63623462303264382d323532642d313165662d396534312d353235343030373338626236, 'ALFAFETOPROTEINA (AFP)', 'examen_tipo_2', 'ALFAFETOPROTEINA (AFP)', '192;192;192', '', '', '', '2', '906602', 'AFP'),
+(189, '0156', 0x63623462303331362d323532642d313165662d396534312d353235343030373338626236, 'ANTICOAGULANTE LUPICO', 'examen_tipo_2', 'ANTICOAGULANTE LUPICO', '192;192;192', '', '', '', '2', '902004', 'AC LUPICO'),
+(190, '0157', 0x63623462303335342d323532642d313165662d396534312d353235343030373338626236, 'CARDIOLIPINA, ANTICUERPOS IG G', 'examen_tipo_2', 'CARDIOLIPINA, ANTICUERPOS IG G', '192;192;192', '', '', '', '2', '906408', 'ACS IGG'),
+(191, '0158', 0x63623462303362312d323532642d313165662d396534312d353235343030373338626236, 'CARDIOLIPINA, ANTICUERPOS IGM', 'examen_tipo_2', 'CARDIOLIPINA, ANTICUERPOS IGM', '192;192;192', '', '', '', '2', '906409', 'ACS IG M'),
+(192, '0159', 0x63623462303366392d323532642d313165662d396534312d353235343030373338626236, 'HORMONA ADRENOCORTICOTROPICA (ACTH)', 'examen_tipo_2', 'HORMONA ADRENOCORTICOTROPICA (ACTH)', '192;192;192', '', '', '', '2', '904103', 'ACTH');
+INSERT INTO `procedimientos` (`ind`, `codigo`, `uuid`, `nombre`, `tabla`, `info`, `color`, `constante`, `constante2`, `unidades`, `tipo`, `tipoprocedimiento`, `abreviatura`) VALUES
+(193, '3001', 0x63623462303433352d323532642d313165662d396534312d353235343030373338626236, 'HEMOGRAMA IV(HB.HTO.INDICES ERITROCITARIOS.PLAQUE', 'hemogramaRayto', 'Hemograma Sistematizado', '128;128;128', NULL, '[
+  {
+    "parametro": "WBC",
+    "nombre": "White Blood Cells (Leucocitos)",
+    "valorReferencia": "4.0 - 11.0 x10³/µL"
+  },
+  {
+    "parametro": "LYMn",
+    "nombre": "Lymphocytes Absolute (Linfocitos absolutos)",
+    "valorReferencia": "1.0 - 4.0 x10³/µL"
+  },
+  {
+    "parametro": "MIDn",
+    "nombre": "Mid-range Cells Absolute (Células intermedias)",
+    "valorReferencia": "0.1 - 1.0 x10³/µL"
+  },
+  {
+    "parametro": "GRAn",
+    "nombre": "Granulocytes Absolute (Granulocitos absolutos)",
+    "valorReferencia": "2.0 - 7.5 x10³/µL"
+  },
+  {
+    "parametro": "LYMp",
+    "nombre": "Lymphocytes Percentage (% Linfocitos)",
+    "valorReferencia": "20 - 40%"
+  },
+  {
+    "parametro": "MIDp",
+    "nombre": "Mid-range Cells Percentage (% Células intermedias)",
+    "valorReferencia": "2 - 10%"
+  },
+  {
+    "parametro": "GRAp",
+    "nombre": "Granulocytes Percentage (% Granulocitos)",
+    "valorReferencia": "40 - 75%"
+  },
+  {
+    "parametro": "RBC",
+    "nombre": "Red Blood Cells (Eritrocitos/Glóbulos rojos)",
+    "valorReferencia": "H: 4.5-6.0 / M: 4.0-5.5 x10⁶/µL"
+  },
+  {
+    "parametro": "HGB",
+    "nombre": "Hemoglobin (Hemoglobina)",
+    "valorReferencia": "H: 13.5-17.5 / M: 12.0-15.5 g/dL"
+  },
+  {
+    "parametro": "MCHC",
+    "nombre": "Mean Corpuscular Hemoglobin Concentration",
+    "valorReferencia": "32 - 36 g/dL"
+  },
+  {
+    "parametro": "MCH",
+    "nombre": "Mean Corpuscular Hemoglobin (Hemoglobina corpuscular media)",
+    "valorReferencia": "27 - 33 pg"
+  },
+  {
+    "parametro": "MCV",
+    "nombre": "Mean Corpuscular Volume (Volumen corpuscular medio)",
+    "valorReferencia": "80 - 100 fL"
+  },
+  {
+    "parametro": "RDWCV",
+    "nombre": "Red Cell Distribution Width, Coeff. of Var. (Ancho de distribución de glóbulos rojos)",
+    "valorReferencia": "11.5 - 14.5 %"
+  },
+  {
+    "parametro": "RDWSD",
+    "nombre": "Red Cell Distribution Width, Std. Dev. (Desviación estándar de ancho de distribución de glóbulos rojos)",
+    "valorReferencia": "35 - 56 fL"
+  },
+  {
+    "parametro": "HCT",
+    "nombre": "Hematocrit (Hematocrito)",
+    "valorReferencia": "H: 40 - 52 / M: 36 - 48 %"
+  },
+  {
+    "parametro": "PLT",
+    "nombre": "Platelet Count (Plaquetas)",
+    "valorReferencia": "150 - 450 x10³/µL"
+  },
+  {
+    "parametro": "MPV",
+    "nombre": "Mean Platelet Volume (Volumen plaquetario medio)",
+    "valorReferencia": "7.4 - 10.4 fL"
+  },
+  {
+    "parametro": "PDW",
+    "nombre": "Platelet Distribution Width (Ancho de distribución plaquetaria)",
+    "valorReferencia": "9.0 - 17.0 %"
+  },
+  {
+    "parametro": "PCT",
+    "nombre": "Plateletcrit (Plaquetocrito)",
+    "valorReferencia": "0.150 - 0.400 %"
+  },
+  {
+    "parametro": "PLCR",
+    "nombre": "Platelet-Large Cell Ratio (Relación de plaquetas grandes)",
+    "valorReferencia": "0.150 - 0.400 %"
+  }
+]', 'N/A', '8', '902203', 'CUADRO HEMATICO'),
+(194, '0160', 0x63623462303437302d323532642d313165662d396534312d353235343030373338626236, 'MICROALBUMINURIA TURBIDIMETRIA', 'examen_tipo_1', 'MICROALBUMINURIA TURBIDIMETRIA', '128;128;128', 'Hasta 15  mg/dl', '', 'mg/dl', '1', '903030', 'MICROALBUMINURIA TURBIDIMETRIA'),
+(196, '0161', 0x63623462303462312d323532642d313165662d396534312d353235343030373338626236, 'ANTIGENO CANCER TUBO DIGESTIVO CA 19-9', 'examen_tipo_2', 'ANTIGENO CANCER TUBO DIGESTIVO CA 19-9', '64;128;128', '', '', '', '2', '906606', 'AG CA 19-9'),
+(197, '0162', 0x63623462303466312d323532642d313165662d396534312d353235343030373338626236, 'ELECTROFORESIS DE PROTEINAS', 'examen_tipo_2', 'ELECTROFORESIS DE PROTEINAS', '128;128;128', '', '', '', '2', '906812', 'ELECTROFORESIS'),
+(198, '0163', 0x63623462303533312d323532642d313165662d396534312d353235343030373338626236, 'BETA 2 MICROGLOBULINA', 'examen_tipo_2', 'BETA 2 MICROGLOBULINA', '192;192;192', '', '', '', '2', '906620', 'BETA 2 MICROGLOBULINA'),
+(199, '0164', 0x63623462303537342d323532642d313165662d396534312d353235343030373338626236, 'GLICEMIA TRES MUESTRAS', 'examen_tipo_2', 'GLICEMIA TRES MUESTRAS', '192;192;192', '', '', 'mg/dl', '2', '903841', 'GLICEMIA'),
+(201, '0442', 0x63623462303561662d323532642d313165662d396534312d353235343030373338626236, 'SOMATOMEDINA C', 'examen_tipo_2', 'SOMATOMEDINA C', '192;192;192', '', '', '', '2', '904109', 'SOMATOMDINA C'),
+(202, '0443', 0x63623462303565642d323532642d313165662d396534312d353235343030373338626236, 'HORMONA DE CRECIMIENTO', 'examen_tipo_2', 'HORMONA DE CRECIMIENTO', '192;192;192', '', '', '', '2', '904201', 'HORMONA DE CRECIMIENTO'),
+(203, '0441', 0x63623462303632652d323532642d313165662d396534312d353235343030373338626236, 'TIROIDEOS MICROSOMALES ANTICUERPOS', 'examen_tipo_2', 'TIROIDEOS MICROSOMALES ANTICUERPOS', '128;128;128', '', '', '', '2', '906460', 'ACS TIROIDEOS MICROSOMALES'),
+(204, '0050', 0x63623462303636642d323532642d313165662d396534312d353235343030373338626236, 'GLICEMIA 4 PM', 'examen_tipo_1', 'GLICEMIA 4 PM', '192;192;192', '', '', '', '1', '903841', 'GLICEMIA 4 PM'),
+(205, '0154', 0x63623462303661632d323532642d313165662d396534312d353235343030373338626236, 'ANTICUERPOS ANTI DNA NATIVO', 'examen_tipo_2', 'ANTICUERPOS ANTI DNA NATIVO', '192;192;192', '', '', '', '2', '906418', 'ANTICUERPOS ANTI DNA NATIVO'),
+(206, '0165', 0x63623462303665382d323532642d313165662d396534312d353235343030373338626236, 'HORMONA PARATIROIDEA (PTH)', 'examen_tipo_2', 'HORMONA PARATIROIDEA (PTH)', '192;192;192', '', '', '', '2', '904912', 'HORMONA PARATIROIDEA'),
+(207, '0166', 0x63623462303732322d323532642d313165662d396534312d353235343030373338626236, 'CICLOSPORINA', 'examen_tipo_2', 'CICLOSPORINA', '192;192;192', '', '', '', '2', '905502', 'CICLOSPORINA'),
+(208, '0167', 0x63623462303736332d323532642d313165662d396534312d353235343030373338626236, 'OSMOLARIDAD EN ORINA', 'examen_tipo_2', 'OSMOLARIDAD EN ORINA', '192;192;192', '', '', '', '2', '903034', 'OSMOLARIDAD ORINA'),
+(209, '0168', 0x63623462303761312d323532642d313165662d396534312d353235343030373338626236, 'OSMOLARIDAD EN SUERO', 'examen_tipo_2', 'OSMOLARIDAD EN SUERO', '192;192;192', '', '', '', '2', '903035', 'OSMOLARIDAD SUERO'),
+(210, '0004', 0x63623462303765312d323532642d313165662d396534312d353235343030373338626236, 'GLICEMIA PRE Y POSTCARGA', 'examen_tipo_2', 'GLICEMIA PRE Y POSTCARGA', '128;128;128', '', '', '', '2', '903842', 'GLICEMIA PRE Y POST CARGA'),
+(211, '0005', 0x63623462303831652d323532642d313165662d396534312d353235343030373338626236, 'GLICEMIA PRE Y POSTPRANDIAL', 'examen_tipo_2', 'GLICEMIA PRE Y POSTPRANDIAL', '192;192;192', '', '', '', '2', '903843', 'GLICEMIA PRE Y POSTPRANDIAL'),
+(212, '0444', 0x63623462303835632d323532642d313165662d396534312d353235343030373338626236, 'CULTIVO DE HONGOS', 'examen_tipo_2', 'CULTIVO DE HONGOS', '192;192;192', '', '', '', '2', '901213', 'CULTIVO DE HONGOS'),
+(213, '0169', 0x63623462303839612d323532642d313165662d396534312d353235343030373338626236, 'HEPATITIS A, ANTICUERPOS IGG', 'examen_tipo_2', 'HEPATITIS A, ANTICUERPOS IGG', '128;128;128', '', '', '', '2', '906219', 'HEPATITIS A ACS IGG'),
+(214, '0170', 0x63623462303864372d323532642d313165662d396534312d353235343030373338626236, 'COLINESTERASA', 'examen_tipo_2', 'COLINESTERASA', '192;192;192', '', '', '', '2', '903416', 'COLINESTERASA'),
+(215, '0171', 0x63623462303931322d323532642d313165662d396534312d353235343030373338626236, 'COPROCULTIVO', 'examen_tipo_2', 'COPROCULTIVO', '192;192;192', '', '', '', '2', '901206', 'COPROCULTIVO'),
+(216, '0299', 0x63623462303934652d323532642d313165662d396534312d353235343030373338626236, 'BACILOSCOPIA 2 MUESTRAS', 'examen_tipo_2', 'BACILOSCOPIA 2 MUESTRAS', '192;192;192', '', '', '', '2', '', 'BACILOSCOPIA 2 MUESTRAS'),
+(217, '0172', 0x63623462303938662d323532642d313165662d396534312d353235343030373338626236, 'CORTISOL  AM/PM', 'examen_tipo_2', 'CORTISOL  AM/PM', '192;192;192', '', '', '', '2', '904806', 'CORTISOL AM/PM'),
+(218, '0173', 0x63623462303963632d323532642d313165662d396534312d353235343030373338626236, 'SATURACION DE TRANSFERRINA', 'examen_tipo_1', 'SATURACION DE TRANSFERRINA', '192;192;192', '20 A 55', '', '%', '1', '903045', 'SATURACION TRANSFERRINA'),
+(219, '0174', 0x63623462306130382d323532642d313165662d396534312d353235343030373338626236, 'ACIDO DELTA AMINOLEVULINICO', 'examen_tipo_2', 'ACIDO DELTA AMINOLEVULINICO', '192;192;192', '', '', '', '2', '903104', 'AC   AMINOLEVULINICO'),
+(220, '0175', 0x63623462306134352d323532642d313165662d396534312d353235343030373338626236, 'PORFOBILINOGENO EN ORINA 24 HORAS', 'examen_tipo_2', 'PORFOBILINOGENO EN ORINA 24 HORAS', '192;192;192', '', '', '', '2', '903042', 'PORFOBILINOGENO'),
+(221, '0176', 0x63623462306138362d323532642d313165662d396534312d353235343030373338626236, 'SCL 70 ANTICUERPOS ANTIESCLERODERMA', 'examen_tipo_2', 'SCL 70 ANTICUERPOS ANTIESCLERODERMA', '192;192;192', '', '', '', '2', '906457', 'SCL 70 ACS ANTIESCLERODERMA'),
+(222, '0177', 0x63623462306163322d323532642d313165662d396534312d353235343030373338626236, 'TRIPANOSOMA CRUZY - CHAGAS- ACS', 'examen_tipo_1', 'TRIPANOSOMA CRUZY - CHAGAS- ACS', '192;192;192', '', '', '', '1', '906131', 'TRIPANOSOMA CRUZY'),
+(223, '0471', 0x63623462306166622d323532642d313165662d396534312d353235343030373338626236, 'INMUNOGLOBULINA M  - IGM-', 'examen_tipo_2', 'INMUNOGLOBULINA M  - IGM-', '192;192;192', '', '', '', '2', '906832', 'INMUNOGLOBULINA M'),
+(224, '0473', 0x63623462306233352d323532642d313165662d396534312d353235343030373338626236, 'INMUNOGLOBULINA G -IGG-', 'examen_tipo_2', 'INMUNOGLOBULINA G -IGG-', '192;192;192', '', '', '', '2', '906829', 'INMUNOGLOBULINA G'),
+(225, '0180', 0x63623462306237342d323532642d313165662d396534312d353235343030373338626236, 'NITROGENO UREICO EN ORINE DE 24 HORAS', 'examen_tipo_1', 'NITROGENO UREICO EN ORINE DE 24 HORAS', '192;192;192', '12.0 - 20.0', '', 'g/24 Horas', '1', '903857', 'NITROGENO UREICO EN 24 HORAS'),
+(226, '0475', 0x63623462306262302d323532642d313165662d396534312d353235343030373338626236, 'DENGUE ANTICUERPOS IG G', 'examen_tipo_2', 'DENGUE ANTICUERPOS IG G', '192;192;192', '', '', '', '2', '906207', 'DENGUE ACS IGG'),
+(227, '0178', 0x63623462306265622d323532642d313165662d396534312d353235343030373338626236, 'ANTICUERPOS MUSCULO LISO - ASMA', 'examen_tipo_2', 'ANTICUERPOS MUSCULO LISO - ASMA', '192;192;192', '', '', '', '2', '906438', 'ANTICUERPOS ASMA'),
+(228, '0179', 0x63623462306332352d323532642d313165662d396534312d353235343030373338626236, 'ANTICUERPOS ANTIMITOCONDRIALES - AMA', 'examen_tipo_2', 'ANTICUERPOS ANTIMITOCONDRIALES - AMA', '192;192;192', '', '', '', '2', '906434', 'ANTICUERPOS ANTIMITOCONDRIALES'),
+(229, '0474', 0x63623462306336372d323532642d313165662d396534312d353235343030373338626236, 'DENGUE ANTICUERPOS IGM', 'examen_tipo_2', 'DENGUE ANTICUERPOS IGM', '192;192;192', '', '', '', '2', '906208', 'DENGUE ANTICUERPOS IGM'),
+(230, '0181', 0x63623462306361352d323532642d313165662d396534312d353235343030373338626236, 'INSULINA BASAL', 'examen_tipo_1', 'INSULINA BASAL', '192;192;192', '3 - 35', '', 'uUI/ml', '1', '904704', 'INSULINA BASAL'),
+(232, '0182', 0x63623462306365342d323532642d313165662d396534312d353235343030373338626236, 'CORTISOL LIBRE EN ORINA DE 24 HORAS', 'examen_tipo_2', 'CORTISOL LIBRE EN ORINA DE 24 HORAS', '192;192;192', '', '', '', '2', '904807', 'CORTISOL LIBRE EN ORINA 24 HORAS'),
+(233, '0183', 0x63623462306432312d323532642d313165662d396534312d353235343030373338626236, 'ALFA 1 ANTITRIPSINA', 'examen_tipo_1', 'ALFA 1 ANTITRIPSINA', '192;192;192', '90 - 200', '', 'mg/dl', '1', '903406', 'ALFA 1 ANTRIPSINA'),
+(234, '0481', 0x63623462306435642d323532642d313165662d396534312d353235343030373338626236, 'PROTEINAS EN ORINA OCASIONAL', 'examen_tipo_1', 'PROTEINAS EN ORINA OCASIONAL', '192;192;192', 'hasta 25 mg/dl', '', 'mg/dl', '1', '', 'PROTEINAS EN ORINA OCASIONAL'),
+(235, '0314', 0x63623462306439392d323532642d313165662d396534312d353235343030373338626236, 'COLORACION AZUL DE METILENO', 'examen_tipo_2', 'COLORACION AZUL DE METILENO', '192;192;192', '', '', '', '2', '901104', 'COLORACION AZUL DE METILENO'),
+(236, '0184', 0x63623462306464362d323532642d313165662d396534312d353235343030373338626236, 'CHLAMYDIA TRACHOMATIS, ANTICUERPOS IGM', 'examen_tipo_2', 'CHLAMYDIA TRACHOMATIS, ANTICUERPOS IGM', '192;192;192', '', '', '', '2', '906020', 'CHLAMYDIA TRACHOMATIS, ACS IGM'),
+(237, '0185', 0x63623462306530662d323532642d313165662d396534312d353235343030373338626236, 'CHLAMYDIA TRACHOMATIS, ANTICUERPOS IGG', 'examen_tipo_2', 'CHLAMYDIA TRACHOMATIS, ANTICUERPOS IGG', '192;192;192', '', '', '', '2', '906019', 'CHLAMYDIA TRACHOMATIS, ACS IGG'),
+(238, '0042A', 0x63623462306534642d323532642d313165662d396534312d353235343030373338626236, 'CREATININA EN ORINA', 'examen_tipo_1', 'CREATININA EN ORINA', '192;192;192', 'Hombres: 39-259 mg/dl , Mujeres : 28-217 mg/dl', '', 'mg/dl', '1', '', 'CREATININA EN ORINA'),
+(239, '0186', 0x63623462306538632d323532642d313165662d396534312d353235343030373338626236, 'CATECOLAMINAS DIFERENCIADAS EN ORINA 24 HORAS', 'examen_tipo_2', 'CATECOLAMINAS DIFERENCIADAS EN ORINA 24 HORAS', '192;192;192', '', '', '', '2', '903009', 'CATECOLAMINAS DIFERENCIADAS EN ORINA 24 HORAS'),
+(240, '0187', 0x63623462306563382d323532642d313165662d396534312d353235343030373338626236, 'HIDROXI PROGESTERONA-17', 'examen_tipo_2', 'HIDROXI PROGESTERONA-17', '192;192;192', '', '', 'ng/ml', '2', '', 'HIDROXI PROGESTERONA-17'),
+(241, '0188', 0x63623462313031332d323532642d313165662d396534312d353235343030373338626236, 'ELECTROFOSERIS DE HB ACIDA', 'examen_tipo_2', 'ELECTROFOSERIS DE HB ACIDA', '192;192;192', '', '', '', '2', '906808', 'ELECTROFORESIS HB ACIDA'),
+(242, '0189', 0x63623462313034652d323532642d313165662d396534312d353235343030373338626236, 'ELECTROFORESIS DE HB ALKALINA', 'examen_tipo_2', 'ELECTROFORESIS DE HB ALKALINA', '192;192;192', '', '', '', '2', '906809', 'ELECTROFORESIS DE HB ALHALINA'),
+(243, '0190', 0x63623462313162612d323532642d313165662d396534312d353235343030373338626236, 'ANTICUERPOS LA/SSB', 'examen_tipo_2', 'ANTICUERPOS LA/SSB', '192;192;192', '', '', '', '2', '906432', 'ANTICUERPOS LA/SSB'),
+(244, '0191', 0x63623462313166372d323532642d313165662d396534312d353235343030373338626236, 'ANTICUERPOS RO/SSA', 'examen_tipo_2', 'ANTICUERPOS RO/SSA', '192;192;192', '', '', '', '2', '906456', 'ANTICUERPOS RO/SSA'),
+(245, '0002', 0x63623462313233342d323532642d313165662d396534312d353235343030373338626236, 'ACIDO  URICO EN ORINA DE 24 HORAS', 'examen_tipo_1', 'ACIDO  UIRICO EN ORINA DE 24 HORAS', '192;192;192', '250-750 mg/24 H', '', 'mg/24 Horas', '1', '903802', 'ACIDO URICO EN ORINA 24 HORAS'),
+(246, '0192', 0x63623462313237342d323532642d313165662d396534312d353235343030373338626236, 'FOSFOLIPIDOS ANTICUERPOS IGG', 'examen_tipo_2', 'FOSFOLIPIDOS ANTICUERPOS IGG', '192;192;192', '', '', '', '2', '', 'FOSFOLIPIDOS ANTICUERPOS IGG'),
+(247, '0193', 0x63623462313262322d323532642d313165662d396534312d353235343030373338626236, 'FOSFOLIPIDOS ANTICUERPOS IGM', 'examen_tipo_2', 'FOSFOLIPIDOS ANTICUERPOS IGM', '192;192;192', '', '', '', '2', '', 'FOSFOLIPIDOS ANTICUERPOS IGM'),
+(248, '0075', 0x63623462313265622d323532642d313165662d396534312d353235343030373338626236, 'COOMBS INDIRECTO, PRUEBA CUANTITATIVA', 'examen_tipo_2', 'COOMBS INDIRECTO, PRUEBA CUANTITATIVA', '192;192;192', '', '', '', '2', '902203', 'COOMBS INDIRECTO PBA CUANTITATIVA'),
+(249, '0194', 0x63623462313332382d323532642d313165662d396534312d353235343030373338626236, 'ANTICUERPOS ANTICITRULINA.PEPTIDO C', 'examen_tipo_2', 'ANTICUERPOS ANTICITRULINA.PEPTIDO C', '192;192;192', '', '', '', '2', '904706', 'ACS ANTICITRULINA'),
+(250, '0195', 0x63623462313336342d323532642d313165662d396534312d353235343030373338626236, 'ALDOLASA', 'examen_tipo_2', 'ALDOLASA', '192;192;192', '', '', '', '2', '903402', 'ALDOLASA'),
+(251, '0196', 0x63623462313361312d323532642d313165662d396534312d353235343030373338626236, 'ANTICUERPOS ANTI CENTROMERO', 'examen_tipo_1', 'ANTICUERPOS ANTI CENTROMERO', '128;128;128', 'NO REACTIVO', '', '', '1', '', 'ACS ANTI CENTROMERO'),
+(252, '0197', 0x63623462313364632d323532642d313165662d396534312d353235343030373338626236, 'ANTICUERPOS SM', 'examen_tipo_2', 'ANTICUERPOS SM', '192;192;192', 'NO REACTIVO', '', '', '2', '', 'ANTICUERPOS SM'),
+(253, '0198', 0x63623462313431612d323532642d313165662d396534312d353235343030373338626236, 'HIDROXICORTICOSTEROIDES -17', 'examen_tipo_2', 'HIDROXICORTICOSTEROIDES -17', '192;192;192', '', '', '', '2', '', 'HIDROXI-CORTICOSTEROIDES-17'),
+(254, '0199', 0x63623462313435642d323532642d313165662d396534312d353235343030373338626236, 'HORMONA FSH Y LH PRE Y POS LIBERADORA DE GONADOTRO', 'examen_tipo_2', 'HORMONA FSH Y LH PRE Y POS LIBERADORA DE GONADOTRO', '192;192;192', '', '', '', '2', '904106', 'HORMONA FSH Y LH PRE Y POS (TEST DE GNRH)'),
+(255, '200', 0x63623462313439642d323532642d313165662d396534312d353235343030373338626236, 'VITAMINA D 1.25 DIHIDROXI', 'examen_tipo_2', 'VITAMINA D 1.25 DIHIDROXI', '128;128;128', '', '', '', '2', '903707', 'VITAMINA D 1.25'),
+(256, '201', 0x63623462313464622d323532642d313165662d396534312d353235343030373338626236, 'VITAMINA D 25 DIHIDROXI', 'examen_tipo_2', 'VITAMINA D 25 DIHIDROXI', '64;128;128', '', '<table border="1">   <thead>     <tr>       <th>Clasificación</th>       <th>Rango</th>     </tr>   </thead>   <tbody>     <tr>       <td>Deficiente</td>       <td>Menor de 20</td>     </tr>     <tr>       <td>Insuficiente</td>       <td>20 a 30</td>     </tr>     <tr>       <td>Suficiente</td>       <td>30 a 100</td>     </tr>     <tr>       <td>Toxicidad</td>       <td>Mayor de 100</td>     </tr>   </tbody> </table>', 'ng/mL', '2', '903706', 'VITAMINA D 25'),
+(257, '0020', 0x63623462313531612d323532642d313165662d396534312d353235343030373338626236, 'BILIRRUBINAS TOTAL Y DIRECTA', 'examen_tipo_2', 'BILIRRUBINAS TOTAL Y DIRECTA', '192;192;192', '', '', '', '2', '903809', 'BILIRRUBINAS TOTAL Y DIRECTA'),
+(258, '0203', 0x63623462313535382d323532642d313165662d396534312d353235343030373338626236, 'PROTEINA S DE LA COAGULACION, ACTIVIDAD', 'examen_tipo_2', 'PROTEINA S DE LA COAGULACION, ACTIVIDAD', '192;192;192', '', '', '%', '2', '902035', 'PROTEINA S DE LA COAGULACION'),
+(259, '0204', 0x63623462313539632d323532642d313165662d396534312d353235343030373338626236, 'PROTEINA C DE LA COAGULACION, ACTIVIDAD', 'examen_tipo_2', 'PROTEINA C DE LA COAGULACION, ACTIVIDAD', '192;192;192', '', '', '%', '2', '902033', 'PROTEINA C DE LA COAGULACION'),
+(260, '0205', 0x63623462313564612d323532642d313165662d396534312d353235343030373338626236, 'VIH, PRUEBA CONFIRMATORIA POR WESTERN BLOTTING', 'examen_tipo_2', 'VIH, PRUEBA CONFIRMATORIA POR WESTERN BLOTTING', '192;192;192', '', '', '', '2', '906250', 'VIH, PRUEBA CONFIRAMTORIA POR WESTERN BLOTTING'),
+(261, '0206', 0x63623462313631372d323532642d313165662d396534312d353235343030373338626236, 'GRASAS NEUTRAS EN HECES', 'examen_tipo_2', 'GRASAS NEUTRAS EN HECES', '192;192;192', '', '', '', '2', '907006', 'GRASAS NEUTRAS EN HECES'),
+(262, '0207', 0x63623462313635352d323532642d313165662d396534312d353235343030373338626236, 'CLAMIDIA,ANTIGENO', 'examen_tipo_2', 'CLAMIDIA,ANTIGENO', '192;192;192', '', '', '', '2', '906308', 'CALAMIDIA,ANTIGENO'),
+(263, '400', 0x63623462313639312d323532642d313165662d396534312d353235343030373338626236, 'BIOINDICADOR', 'examen_tipo_2', 'BIOINDICADOR', '192;192;192', '', '', '', '2', '', 'BIOINDICADOR'),
+(264, '0208', 0x63623462313663662d323532642d313165662d396534312d353235343030373338626236, 'LINFOCITOS T CD3,CD4,CD8', 'examen_tipo_2', 'LINFOCITOS T CD3,CD4,CD8', '192;192;192', '', '', '', '2', '906744', 'LINFOCITOS T CD3,CD4,CD8'),
+(265, '0209', 0x63623462313730662d323532642d313165662d396534312d353235343030373338626236, 'VIH CARGA VIRAL', 'examen_tipo_2', 'VIH CARGA VIRAL', '192;192;192', '', '', '', '2', '906840', 'VIH CARGA VIRAL'),
+(266, '0210', 0x63623462313734612d323532642d313165662d396534312d353235343030373338626236, 'HEPATIS B, ANTIGENO E (AG HBE)', 'examen_tipo_2', 'HEPATIS B, ANTIGENO E (AG HBE)', '192;192;192', '', '', '', '2', '', 'HEPATIS B, ANTIGENO E (AG HBE)'),
+(267, '0211', 0x63623462313738642d323532642d313165662d396534312d353235343030373338626236, 'CAPACIDAD DE COMBINACION DEL HIERRO (TIBC)', 'examen_tipo_2', 'CAPACIDAD DE COMBINACION DEL HIERRO (TIBC)', '192;192;192', '', '', '', '2', '903812', 'CAPACIDAD DE COMBINACION DEL HIERRRO (TIBC)'),
+(268, '0213', 0x63623462313763632d323532642d313165662d396534312d353235343030373338626236, 'CRIOGLOBULINAS', 'examen_tipo_1', 'CRIOGLOBULINAS', '128;255;255', '', '', '', '1', '906909', 'CRIOGLOBULINAS'),
+(269, '0215', 0x63623462313830372d323532642d313165662d396534312d353235343030373338626236, 'ANTIGENO DE CANCER DE TUBO DIGESTIVO (CA 19-9)', 'examen_tipo_2', 'ANTIGENO DE CANCER DE TUBO DIGESTIVO (CA 19-9)', '186;170;213', '', '', '', '2', '906606', 'CA 19-9'),
+(270, '0214', 0x63623462313834322d323532642d313165662d396534312d353235343030373338626236, 'INSULINA PRE Y POST GLUCOSA', 'examen_tipo_2', 'INSULINA PRE Y POST GLUCOSA', '192;192;192', '', '', '', '2', '904702', 'INSULINA PRE Y POST GLUCOSA'),
+(271, '906130', 0x63623462313837662d323532642d313165662d396534312d353235343030373338626236, 'HEPATITIS B, ACS CENTRAL IGM ANTICORE', 'examen_tipo_2', 'HEPATITIS B, ACS CENTRAL IGM ANTICORE', '00;128;192', 'menor de 1.0', '', '', '2', '', 'HB ASC C IGM'),
+(272, '906131', 0x63623462313862632d323532642d313165662d396534312d353235343030373338626236, 'HEPATITIS B, ACS CENTRALES IGG', 'examen_tipo_2', 'HEPATITIS B, ACS CENTRALES IGG', '00;128;192', '', '', 'inferior a 0', '2', '', 'HB. ASC C IGG'),
+(273, '906132', 0x63623462313866622d323532642d313165662d396534312d353235343030373338626236, 'ACIDO VANILMANDELICO EN 24 HORAS', 'examen_tipo_1', 'ACIDO VANILMANDELICO EN 24 HORAS', '00;00;255', '0', '', '', '1', '', 'AV 24 H'),
+(274, '906133', 0x63623462313933662d323532642d313165662d396534312d353235343030373338626236, 'PEPTIDO ATRIAL NOTRIURETICO', 'examen_tipo_1', 'PEPTIDO ATRIAL NOTRIURETICO', '00;128;192', '', '', '', '1', '', 'PEPTIDO'),
+(275, '0216', 0x63623462313939642d323532642d313165662d396534312d353235343030373338626236, 'PEPTIDO ATRIAL NOTRIURETICO', 'examen_tipo_1', 'PEPTIDO ATRIAL NOTRIURETICO', '00;128;192', '0-374', '', '', '1', '', 'PEPTIDO A.N.'),
+(276, '0217', 0x63623462313964632d323532642d313165662d396534312d353235343030373338626236, 'ACIDO VANILMANDELICO EN ORINA DE 24 HORAS', 'examen_tipo_2', 'ACIDO VANILMANDELICO EN ORINA DE 24 HORAS', '00;128;192', '0-14', '', 'mg/24 Horas', '2', '903115', 'ACIDO VANIL'),
+(277, '218', 0x63623462316131652d323532642d313165662d396534312d353235343030373338626236, 'HAPTOGLOBINA', 'examen_tipo_1', 'HAPTOGLOBINA', '192;192;192', '30-200', '', 'mg/dl', '1', '903022', 'HAPT'),
+(278, '219', 0x63623462316136322d323532642d313165662d396534312d353235343030373338626236, 'GLUCOMETRIA POST', 'examen_tipo_1', 'GLUCOMETRIA POST', '00;00;255', '', '', 'mg/dl', '1', '', 'GLUCOMETRIA POST'),
+(279, '220', 0x63623462316161302d323532642d313165662d396534312d353235343030373338626236, 'PRUEBA TUBERCULINA PPD', 'examen_tipo_2', 'PRUEBA TUBERCULINA PPD', '192;192;192', '', '', '', '2', '901404', 'PPD'),
+(280, '221', 0x63623462316165312d323532642d313165662d396534312d353235343030373338626236, 'ACIDO PIRUVICO', 'examen_tipo_1', 'ACIDO PIRUVICO', '192;192;192', '0.034 - 0.102', '', 'mmol/l', '1', '903114', 'PIRUVATO'),
+(281, '222', 0x63623462316231662d323532642d313165662d396534312d353235343030373338626236, 'INMUNOGLOBULINA E . DOSIFICACION C/ALERGENO', 'examen_tipo_2', 'INMUNOGLOBULINA E . DOSIFICACION C/ALERGENO', '192;192;192', '', '', '', '2', '906834', 'IGE  DOSIFICACION'),
+(282, '223', 0x63623462316235662d323532642d313165662d396534312d353235343030373338626236, 'CULTIVO PARA TAMIZAJE DE ESTREPTOCOCO GRUPO B VAGI', 'examen_tipo_2', 'CULTIVO PARA TAMIZAJE DE ESTREPTOCOCO GRUPO B VAGI', '00;128;128', '', '', '', '2', '', 'ESTREP B'),
+(283, '224', 0x63623462316261342d323532642d313165662d396534312d353235343030373338626236, 'GLUCOMETRIA PRE- POST', 'examen_tipo_2', 'GLUCOMETRIA PRE- POST', '00;128;128', '', '', 'mg/dl', '2', '', 'GLUCOME'),
+(284, '225', 0x63623462316265642d323532642d313165662d396534312d353235343030373338626236, 'VARICELA ZOSTER ANTI IGG', 'examen_tipo_2', 'VARICELA ZOSTER ANTI IGG', '00;128;128', '', '', '', '2', '', 'VARICE ANTI IGG'),
+(285, '226', 0x63623462316333322d323532642d313165662d396534312d353235343030373338626236, 'HLA B 27 POR CITOMETRIA DE FLUJO', 'examen_tipo_1', 'HLA B 27 POR CITOMETRIA DE FLUJO', '00;128;64', 'NEGATIVO', '', '', '1', '', 'HLA B 27'),
+(286, '227', 0x63623462316337322d323532642d313165662d396534312d353235343030373338626236, 'VARICELA ZOSTER ANTI IGM', 'examen_tipo_2', 'VARICELA ZOSTER ANTI IGM', '00;128;128', 'NEGATIVO < 0.9', '', '', '2', '', 'VZ IGM'),
+(287, '228', 0x63623462316362332d323532642d313165662d396534312d353235343030373338626236, 'A. URICO EN ORINA 24 HORAS', 'examen_tipo_2', 'A. URICO EN ORINA 24 HORAS..', '00;128;000', '', '', 'mg/dl', '2', '', 'A. URICO ORINA 24 H'),
+(288, '125', 0x63623462316366322d323532642d313165662d396534312d353235343030373338626236, 'TOXOPLASMA IG A', 'examen_tipo_2', 'TOXOPLASMA IG A', '128;128;128', '', '', '', '2', '906126', 'TOXOPLASMA IGA'),
+(289, '0421', 0x63623462316433342d323532642d313165662d396534312d353235343030373338626236, 'CULTIVO DE MYCOBACTERIUM TBC', 'examen_tipo_2', 'CULTIVO DE MYCOBACTERIUM TBC', '128;128;128', '', '', '', '2', '901230', 'CULTIVO  TBC'),
+(290, '0229', 0x63623462316437332d323532642d313165662d396534312d353235343030373338626236, 'TOXOPLASMA IGM', 'examen_tipo_2', 'TOXOPLASMA IGM', '192;192;192', '', '', '', '2', '906129', 'TOXOPLASMA IGM'),
+(291, '0230', 0x63623462316462312d323532642d313165662d396534312d353235343030373338626236, 'TOXOPLASMA, ACS  IG A', 'examen_tipo_2', 'TOXOPLASMA, ACS  IG A', '192;192;192', '', '', '', '2', '906126', 'TOXOPLASMA IG A'),
+(292, '0231', 0x63623462316466342d323532642d313165662d396534312d353235343030373338626236, 'HEPATITIS A, ANTICUERPOS TOTALES', 'examen_tipo_2', 'HEPATITIS A, ANTICUERPOS TOTALES', '192;192;192', '', '', '', '2', '906219', 'HP-A'),
+(293, '0232', 0x63623462316533342d323532642d313165662d396534312d353235343030373338626236, 'CANNABINOIDES. MARIHUANA', 'examen_tipo_1', 'CANNABINOIDES. MARIHUANA', '192;192;192', '', '', '', '1', '905717', 'CANABIS'),
+(294, '0233', 0x63623462316537312d323532642d313165662d396534312d353235343030373338626236, 'COCAINA', 'examen_tipo_1', 'COCAINA', '192;192;192', '', '', '', '1', '905725', 'COCAINA'),
+(295, '903811', 0x63623462316562322d323532642d313165662d396534312d353235343030373338626236, 'CALCIO EN ORINA 24 HORAS', 'examen_tipo_1', 'CALCIO EN ORINA 24 HORAS', '202;234;153', '100 a 300', '', 'mg/24 Horas', '1', '903811', 'CALCIO ORINA 24H'),
+(296, '234', 0x63623462316566332d323532642d313165662d396534312d353235343030373338626236, 'SANGRE OCULTA SERIDA # 2', 'examen_tipo_1', 'SANGRE OCULTA SERIDA # 2', '255;255;255', '', '', '', '1', '907008', 'SANGRE OCULTA SERIADA #2'),
+(297, '235', 0x63623462316633322d323532642d313165662d396534312d353235343030373338626236, 'CURVA DE INSULINA ( 4 MUESTRAS)', 'examen_tipo_2', 'CURVA DE INSULINA ( 4 MUESTRAS)', '128;255;00', '', '', '', '2', '', 'CURVA DE INSULINA'),
+(298, '236', 0x63623462316637382d323532642d313165662d396534312d353235343030373338626236, 'FOSFORO EN ORINA DE 24 HORAS', 'examen_tipo_1', 'FOSFORO EN ORINA DE 24 HORAS', '255;255;255', '300 - 1000', '', 'mg/24 Horas', '1', '', 'FOSFORO EN ORINA DE 24 HORAS'),
+(301, '3432', 0x000000000000000000000000000000000000000000000000000000000000000000023456, 'MICROALBUMINURIA', 'examen_tipo_2', 'MICROALBUMINURIA', '', '0-20 mg/L', '', 'mg/L', '2', '903105', 'MAU'),
+(302, '3435', 0x63623462316666662d323532642d313165662d396534312d353235343030373338626236, 'VIH ANTICUERPOS 1 Y 2 PRUEBA RAPIDA', 'examen_tipo_2', 'VIH anticuerpos 1 y 2 Prueba rápida.', NULL, NULL, '', NULL, '2', NULL, 'viha12'),
+(303, '4567', 0x31343230353065652d356662662d313165662d613534352d353235343030373338626236, 'GLUCOSA EN SUERO', 'examen_tipo_2', 'GLUCOSA EN SUERO', '255;255;255', '70-100 mg/dl', '', 'mg/dL', '2', NULL, 'GCSU'),
+(304, '4568', 0x33386138393133392d363061352d313165662d613534352d353235343030373338626236, 'GLUCOSA PRE Y POST', 'examen_tipo_2', 'Glucosa preprandial y posprandial', '123;45;234', '0', '', 'mg', '2', '0', NULL),
+(305, '4569', 0x38643435306538662d363061352d313165662d613534352d353235343030373338626236, 'VELOCIDAD DE SEDIMENTACIÓN GLOBULAR (Vsg)', 'examen_tipo_2', 'VELOCIDAD DE SEDIMENTACIÓN GLOBULAR (Vsg)', '200;200;200', '0-20 mm/h', '', 'mm/h', '2', NULL, NULL),
+(306, '5000', 0x000000000000000000000000000000000000000000000000000000000000000000023456, 'NUCLEARES, ANTICUERPOS [ANA], POR EIA', 'examen_tipo_2', 'NUCLEARES, ANTICUERPOS [ANA], POR EIA', NULL, NULL, '', NULL, NULL, NULL, NULL);
+    </script>
+    <script>
+        function showSection(id, element) {
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.remove('active');
+            });
+            document.getElementById(id).classList.add('active');
+
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+            });
+            element.classList.add('active');
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            showSection('introduccion', document.querySelector('.nav-link[href="#introduccion"]'));
+            loadProcedimientos();
+        });
+
+        function loadProcedimientos() {
+            const procedimientosSql = document.getElementById('sql-data').textContent;
+
+            // Column names from the INSERT statement
+            const columnNames = ['ind', 'codigo', 'uuid', 'nombre', 'tabla', 'info', 'color', 'constante', 'constante2', 'unidades', 'tipo', 'tipoprocedimiento', 'abreviatura'];
+
+            // Parse all value rows from SQL
+            const procedimientos = parseAllRows(procedimientosSql, columnNames);
+            renderTable(procedimientos);
+        }
+
+        /**
+         * Parse SQL INSERT multi-row VALUES into array of objects.
+         * Handles: single-quoted strings (with '' escapes), hex literals, NULL, numbers,
+         * and multi-line values (HTML tables, JSON inside SQL strings).
+         */
+        function parseAllRows(sql, columnNames) {
+            const results = [];
+            // Find all top-level (...) groups after VALUES
+            // Strategy: manual char-by-char scan to handle nested parens in strings
+            let i = 0;
+            while (i < sql.length) {
+                // Find next opening paren that starts a value row
+                const valIdx = sql.indexOf('(', i);
+                if (valIdx === -1) break;
+
+                // Check we're not inside a VALUES keyword area or column def — just parse all (...) tuples
+                // Extract the balanced parenthesized content
+                let depth = 0;
+                let inString = false;
+                let j = valIdx;
+                for (; j < sql.length; j++) {
+                    const ch = sql[j];
+                    if (inString) {
+                        if (ch === "'" && j + 1 < sql.length && sql[j + 1] === "'") {
+                            j++; // skip escaped quote
+                        } else if (ch === "'") {
+                            inString = false;
+                        }
+                    } else {
+                        if (ch === "'") {
+                            inString = true;
+                        } else if (ch === '(') {
+                            depth++;
+                        } else if (ch === ')') {
+                            depth--;
+                            if (depth === 0) break;
+                        }
+                    }
+                }
+
+                const rowContent = sql.substring(valIdx + 1, j);
+                i = j + 1;
+
+                // Skip column definition parens (contain backticks or keywords like INSERT)
+                if (rowContent.includes('`') || rowContent.includes('INSERT')) continue;
+
+                const values = splitSqlValues(rowContent);
+                if (values.length !== columnNames.length) continue;
+
+                const obj = {};
+                columnNames.forEach((col, idx) => {
+                    obj[col] = values[idx];
+                });
+                results.push(obj);
+            }
+            return results;
+        }
+
+        /**
+         * Split a SQL VALUES row content by commas, respecting single-quoted strings.
+         * Returns array of parsed values (strings unquoted, NULL as null, hex as-is, numbers as-is).
+         */
+        function splitSqlValues(content) {
+            const values = [];
+            let current = '';
+            let inString = false;
+            for (let i = 0; i < content.length; i++) {
+                const ch = content[i];
+                if (inString) {
+                    if (ch === "'" && i + 1 < content.length && content[i + 1] === "'") {
+                        current += "'";
+                        i++; // skip escaped quote
+                    } else if (ch === "'") {
+                        inString = false;
+                        current += ch;
+                    } else {
+                        current += ch;
+                    }
+                } else {
+                    if (ch === "'") {
+                        inString = true;
+                        current += ch;
+                    } else if (ch === ',') {
+                        values.push(parseSqlValue(current.trim()));
+                        current = '';
+                    } else {
+                        current += ch;
+                    }
+                }
+            }
+            if (current.trim()) {
+                values.push(parseSqlValue(current.trim()));
+            }
+            return values;
+        }
+
+        function parseSqlValue(val) {
+            if (val === 'NULL') return null;
+            if (val.startsWith("'") && val.endsWith("'")) {
+                return val.substring(1, val.length - 1).replace(/''/g, "'");
+            }
+            if (val.startsWith('0x')) return val; // hex
+            return val; // number or other
+        }
+
+        let allProcedimientos = [];
+
+        function filtrarExamenes(texto) {
+            const filtrado = allProcedimientos.filter(proc => {
+                const busqueda = texto.toLowerCase();
+                return (proc.codigo && proc.codigo.toLowerCase().includes(busqueda)) ||
+                       (proc.nombre && proc.nombre.toLowerCase().includes(busqueda));
+            });
+            renderAgrupado(filtrado);
+        }
+
+        function getTipoNombre(tipo) {
+            const tipos = {
+                '1': 'Perfil 1 (Exámenes Generales)',
+                '2': 'Perfil 2 (Exámenes Especiales)',
+                '3': 'Parcial de Orina',
+                '4': 'Coprológico',
+                '6': 'Frotis Vaginal',
+                '8': 'Hemograma / Perfil Lipídico'
+            };
+            return tipos[tipo] || 'Otros';
+        }
+
+        function renderAgrupado(procedimientos) {
+            const contenedor = document.getElementById('diccionario-contenedor');
+            contenedor.innerHTML = '';
+
+            const grouped = {};
+            procedimientos.forEach(proc => {
+                const tipo = proc.tipo || '0';
+                if (!grouped[tipo]) grouped[tipo] = [];
+                grouped[tipo].push(proc);
+            });
+
+            const tiposOrdenados = ['1', '2', '3', '4', '6', '8', '0'];
+            tiposOrdenados.forEach(tipo => {
+                if (!grouped[tipo] || grouped[tipo].length === 0) return;
+
+                const seccion = document.createElement('div');
+                seccion.className = 'mb-6';
+
+                const titulo = document.createElement('h4');
+                titulo.className = 'text-lg font-semibold text-indigo-700 mb-2 flex items-center gap-2';
+                titulo.innerHTML = '<i class="bi bi-folder-fill"></i> ' + getTipoNombre(tipo) + 
+                    '<span class="text-xs font-normal text-gray-500 ml-2">(' + grouped[tipo].length + ' exámenes)</span>';
+                seccion.appendChild(titulo);
+
+                const tablaContainer = document.createElement('div');
+                tablaContainer.className = 'overflow-x-auto rounded-lg border border-gray-200 shadow-sm';
+
+                const tabla = document.createElement('table');
+                tabla.className = 'json-table';
+
+                const thead = document.createElement('thead');
+                thead.className = 'bg-gray-50';
+                thead.innerHTML = `
+                    <tr>
+                        <th scope="col" class="px-4 py-2 text-xs font-medium text-gray-500 uppercase tracking-wider sticky top-0 bg-gray-50">Código</th>
+                        <th scope="col" class="px-4 py-2 text-xs font-medium text-gray-500 uppercase tracking-wider sticky top-0 bg-gray-50">Nombre del Examen</th>
+                        <th scope="col" class="px-4 py-2 text-xs font-medium text-gray-500 uppercase tracking-wider sticky top-0 bg-gray-50">Unidades</th>
+                        <th scope="col" class="px-4 py-2 text-xs font-medium text-gray-500 uppercase tracking-wider sticky top-0 bg-gray-50">Valores de Referencia</th>
+                    </tr>`;
+                tabla.appendChild(thead);
+
+                const tbody = document.createElement('tbody');
+                tbody.className = 'bg-white divide-y divide-gray-200';
+
+                grouped[tipo].forEach(proc => {
+                    let referenciaHtml = proc.referencia;
+
+                    if (referenciaHtml && referenciaHtml.startsWith('JSON_TABLE_DATA:')) {
+                        const jsonPart = referenciaHtml.substring('JSON_TABLE_DATA:'.length);
+                        try {
+                            const jsonRef = JSON.parse(jsonPart);
+                            if (Array.isArray(jsonRef)) {
+                                let tableHtml = '<table class="min-w-full text-xs text-left text-gray-700 bg-white border border-gray-200 rounded-md mt-2">';
+                                tableHtml += '<thead class="bg-gray-100"><tr class="border-b border-gray-200">';
+                                const headers = Object.keys(jsonRef[0] || {});
+                                headers.forEach(header => {
+                                    tableHtml += '<th class="px-3 py-1 font-medium">' + header.replace(/_/g, ' ').replace('valorReferencia', 'Valor Referencia').replace('dato', 'Dato') + '</th>';
+                                });
+                                tableHtml += '</tr></thead><tbody>';
+                                jsonRef.forEach(item => {
+                                    tableHtml += '<tr class="border-b border-gray-100">';
+                                    headers.forEach(header => {
+                                        tableHtml += '<td class="px-3 py-1">' + (item[header] || '') + '</td>';
+                                    });
+                                    tableHtml += '</tr>';
+                                });
+                                tableHtml += '</tbody></table>';
+                                referenciaHtml = tableHtml;
+                            }
+                        } catch (e) {
+                            referenciaHtml = '<span>Error al procesar referencia</span>';
+                        }
+                    }
+
+                    const row = document.createElement('tr');
+                    row.className = 'hover:bg-gray-50';
+                    row.innerHTML =
+                        '<td class="px-4 py-2 whitespace-nowrap">' + (proc.codigo || 'N/A') + '</td>' +
+                        '<td class="px-4 py-2">' + (proc.nombre || 'N/A') + '</td>' +
+                        '<td class="px-4 py-2 whitespace-nowrap text-gray-600">' + (proc.unidades || 'N/A') + '</td>' +
+                        '<td class="px-4 py-2 text-sm">' + (referenciaHtml || 'No especificado') + '</td>';
+                    tbody.appendChild(row);
+                });
+
+                tabla.appendChild(tbody);
+                tablaContainer.appendChild(tabla);
+                seccion.appendChild(tablaContainer);
+                contenedor.appendChild(seccion);
+            });
+
+            if (contenedor.innerHTML === '') {
+                contenedor.innerHTML = '<p class="text-center text-gray-500 py-8">No se encontraron exámenes que coincidan con la búsqueda.</p>';
+            }
+        }
+
+        function renderTable(procedimientos) {
+            allProcedimientos = procedimientos.map(proc => {
+                let referenciaCombinada = proc.constante || '';
+
+                if (proc.constante2) {
+                    try {
+                        const jsonRef = JSON.parse(proc.constante2);
+                        if (Array.isArray(jsonRef)) {
+                            if (referenciaCombinada) referenciaCombinada += '<br>';
+                            referenciaCombinada += 'JSON_TABLE_DATA:' + JSON.stringify(jsonRef);
+                        }
+                    } catch (e) {
+                        if (proc.constante2.trim().startsWith('<table')) {
+                            if (referenciaCombinada) referenciaCombinada += '<br>';
+                            referenciaCombinada += proc.constante2;
+                        } else {
+                            if (proc.constante2.trim()) {
+                                if (referenciaCombinada) referenciaCombinada += ' ';
+                                referenciaCombinada += proc.constante2;
+                            }
+                        }
+                    }
+                }
+
+                return {
+                    codigo: proc.codigo,
+                    nombre: proc.nombre,
+                    tabla: proc.tabla,
+                    unidades: proc.unidades,
+                    tipo: proc.tipo,
+                    referencia: referenciaCombinada.replace(/\n/g, '<br>').replace(/\r/g, '')
+                };
+            });
+
+            renderAgrupado(allProcedimientos);
+        }
+    </script>
+</body>
+</html>
