@@ -1,4 +1,5 @@
 import { http, httpLocal, probarServidor } from '../core/http.svelte'
+import { msgEsOk, payloadGuardarExamenes, type RespMsg } from './guardado'
 import type {
 	CodExamen,
 	Configuracion,
@@ -402,7 +403,7 @@ export async function examenesPacienteFecha(identificacion: string, fecha: strin
 	}
 }
 
-/** Guarda un detalle de examen y lo marca como realizado. */
+/** Guarda un detalle de examen y lo marca como realizado (solo si el detalle se guardó). */
 export async function guardarDetalle(
 	tabla: string,
 	datos: Record<string, string | number | null | undefined>,
@@ -411,22 +412,28 @@ export async function guardarDetalle(
 	fecha: string
 ): Promise<boolean> {
 	try {
-		await http('guardarExamen.php', {
+		const r = await http<RespMsg>('guardarExamen.php', {
 			method: 'POST',
 			body: { ...datos, tabla, codexamen }
 		})
-		await updateExamen(codexamen, identificacion, fecha)
-		return true
+		// Si el detalle no se guardó (msg:false / "no"), NO se marca como realizado.
+		if (!msgEsOk(r)) return false
+		return await updateExamen(codexamen, identificacion, fecha)
 	} catch {
 		return false
 	}
 }
 
-export async function updateExamen(codexamen: string, identificacion: string, fecha: string): Promise<void> {
-	await http('updateExamen.php', {
-		method: 'POST',
-		body: { codexamen, identificacion, fecha }
-	})
+export async function updateExamen(codexamen: string, identificacion: string, fecha: string): Promise<boolean> {
+	try {
+		const r = await http<RespMsg>('updateExamen.php', {
+			method: 'POST',
+			body: { codexamen, identificacion, fecha }
+		})
+		return msgEsOk(r)
+	} catch {
+		return false
+	}
 }
 
 export async function eliminarExamen(identificacion: string, fecha: string): Promise<boolean> {
@@ -509,15 +516,15 @@ export async function guardarExamenes(
 	fecha: string
 ): Promise<boolean> {
 	try {
-		await http('guardarExamenes.php', {
+		const r = await http<RespMsg>('guardarExamenes.php', {
 			method: 'POST',
 			body: {
-				examenes: JSON.stringify(procedimientos.map((p) => ({ codigo: p.codigo }))),
+				examenes: payloadGuardarExamenes(procedimientos),
 				identificacion,
 				fecha
 			}
 		})
-		return true
+		return msgEsOk(r)
 	} catch {
 		return false
 	}

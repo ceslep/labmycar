@@ -11,7 +11,7 @@ if (isset($datos->codexamen))
 $codexamen=$datos->codexamen;
 
 $stmt=$mysqli->prepare("SELECT *,procedimientos.nombre as nombreExamen,procedimientos.constante as constant,procedimientos.unidades from examen_tipo_2 inner join procedimientos on examen_tipo_2.examen=procedimientos.codigo where identificacion=? and fecha=? and examen_tipo_2.examen=?");
-$stmt->bind_param("ssi",$identificacion,$fecha,$codexamen);
+$stmt->bind_param("sss",$identificacion,$fecha,$codexamen);
 $stmt->execute();
 $result=$stmt->get_result();
 if ($result->num_rows>0)
