@@ -28,6 +28,9 @@ servidor: son pruebas de lógica pura y de contrato del algoritmo.
   - un examen ya `realizado='S'` se conserva y no se duplica al reasignar;
   - deseleccionar un pendiente lo elimina; un realizado permanece aunque no se
     marque.
+- `tests/salud.test.ts` — motor de análisis de salud (`src/lib/salud/analisis.ts`):
+  rangos de hemograma por sexo, perfil lipídico, orina, coprológico, frotis y
+  valoraciones tipo 1/2 (cualitativas y por rango).
 
 ## Cobertura real del backend
 

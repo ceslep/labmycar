@@ -172,6 +172,7 @@ export interface ExamenPublico {
 	tabla?: string
 	info?: string
 	nombres?: string
+	genero?: string
 	fecnac?: string
 	edad?: string
 }

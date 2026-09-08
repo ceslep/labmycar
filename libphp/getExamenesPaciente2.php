@@ -40,6 +40,7 @@ $sql = "SELECT examenes.*,
     procedimientos.tabla AS tabla,
     procedimientos.info AS info,
     concat_ws(' ', paciente.nombres, paciente.apellidos) AS nombres,
+    paciente.genero AS genero,
     paciente.fecnac AS fecnac,
     round((to_days(curdate()) - to_days(paciente.fecnac)) / 365.242199, 2) AS edad
   FROM examenes

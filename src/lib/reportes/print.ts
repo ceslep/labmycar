@@ -3,6 +3,7 @@ import { nombreCompletoPaciente, examenRealizado } from '../models/models'
 import type { EsquemaExamen } from '../schemas/resultados'
 import { getConfiguracion, getProcedimiento } from '../api/laboratorio'
 import { calcularEdad, formatearFechaLarga } from '../utils/format'
+import { htmlTablaReferencia } from './referencia'
 import { getBaseUrl } from '../core/config.svelte'
 
 /** Abre una ventana de impresión en blanco (debe llamarse dentro del gestor de clic). */
@@ -50,6 +51,13 @@ table.detalle th { background: #0a7cff; color: #ffffff; text-align: left; font-s
 .firma .cargo { font-size: 9.5px; color: #3f4451; margin-top: 2px; }
 .obs-bloque h3 { font-size: 10px; margin: 9px 0 2px; color: #0a7cff; text-transform: uppercase; letter-spacing: .5px; }
 .referencia { margin: 0 0 9px; font-size: 10.5px; color: #3f4451; }
+.ref-bloque { margin: 2px 0 10px; }
+.ref-bloque h3 { font-size: 10px; margin: 0 0 4px; color: #0a7cff; text-transform: uppercase; letter-spacing: .5px; }
+.ref-bloque table.ref-tabla { width: 100%; border-collapse: collapse; }
+.ref-bloque table.ref-tabla th, .ref-bloque table.ref-tabla td { border: 1px solid #c3c7d2; padding: 4px 6px; font-size: 10px; text-align: left; vertical-align: top; }
+.ref-bloque table.ref-tabla thead th { background: #eef0fa; color: #0a7cff; font-weight: 700; text-transform: uppercase; letter-spacing: .4px; }
+.ref-bloque table.ref-tabla tbody tr:nth-child(even) td { background: #f7f8fc; }
+.ref-bloque pre { margin: 0; font-family: inherit; font-size: 10px; white-space: pre-wrap; color: #3f4451; }
 `
 }
 
@@ -87,23 +95,36 @@ function pacienteHtml(p: Paciente): string {
 function cuerpoExamenHtml(d: DatosReporte): string {
 	const { esquema, fila } = d
 	const unidad = d.procedimiento.unidades
-	const filas: string[] = []
-	let grupoActual = ''
+
+	// Construye las filas agrupadas SOLO con parámetros que tengan valor:
+	// los exámenes de varios valores (hemograma, perfil, orina...) no deben
+	// mostrar filas vacías en el reporte (vista previa y PDF usan este HTML).
+	const grupos: Array<{ nombre: string; filas: string[] }> = []
 	if (esquema) {
 		for (const c of esquema.campos) {
-			const grupo = c.grupo ?? ''
-			if (grupo !== grupoActual) {
-				grupoActual = grupo
-				if (grupo) filas.push(`<tr class="grupo"><td colspan="3">${esc(grupo)}</td></tr>`)
-			}
 			const valor = fila?.[c.clave] ?? ''
+			const texto = String(valor).trim()
+			if (!texto) continue // parámetro sin valor: no aparece
+			const grupo = c.grupo ?? ''
+			let g = grupos.length ? grupos[grupos.length - 1] : null
+			if (!g || g.nombre !== grupo) {
+				g = { nombre: grupo, filas: [] }
+				grupos.push(g)
+			}
 			if (c.multilinea) {
-				if (String(valor).trim()) filas.push(`<tr><td colspan="2">${esc(c.etiqueta)}</td><td class="valor" style="text-align:left">${esc(valor)}</td></tr>`)
+				g.filas.push(`<tr><td colspan="2">${esc(c.etiqueta)}</td><td class="valor" style="text-align:left">${esc(valor)}</td></tr>`)
 			} else {
-				filas.push(`<tr><td style="width:60%">${esc(c.etiqueta)}</td><td class="valor" style="width:25%">${esc(valor)}</td><td style="width:15%;text-align:center">${unidad ? esc(unidad) : ''}</td></tr>`)
+				g.filas.push(`<tr><td style="width:60%">${esc(c.etiqueta)}</td><td class="valor" style="width:25%">${esc(valor)}</td><td style="width:15%;text-align:center">${unidad ? esc(unidad) : ''}</td></tr>`)
 			}
 		}
 	}
+	const filas: string[] = []
+	for (const g of grupos) {
+		if (g.filas.length === 0) continue
+		if (g.nombre) filas.push(`<tr class="grupo"><td colspan="3">${esc(g.nombre)}</td></tr>`)
+		filas.push(...g.filas)
+	}
+
 	const observaciones = fila?.['observaciones'] ?? ''
 	const html = `
 		<div class="pagina">
@@ -113,6 +134,7 @@ function cuerpoExamenHtml(d: DatosReporte): string {
 			${pacienteHtml(d.paciente)}
 			${filas.length ? `<table class="detalle"><tr><th>Examen / Parámetro</th><th style="width:25%;text-align:center">Resultado</th><th style="width:15%;text-align:center">Unidades</th></tr>${filas.join('')}</table>` : ''}
 			${d.procedimiento.constante ? `<p class="referencia"><b>Valor de referencia:</b> ${esc(d.procedimiento.constante)}</p>` : ''}
+			${htmlTablaReferencia(d.procedimiento.constante2)}
 			${observaciones ? `<div class="obs-bloque"><h3>Observaciones</h3><div class="obs">${esc(observaciones)}</div></div>` : ''}
 			${pieHtml(d.config)}
 		</div>`

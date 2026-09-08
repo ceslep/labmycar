@@ -14,6 +14,7 @@
 	import EmptyState from '../lib/ui/EmptyState.svelte'
 	import StatusPill from '../lib/ui/StatusPill.svelte'
 	import HoverCard from '../lib/ui/HoverCard.svelte'
+	import AnalisisSaludCard from '../lib/ui/AnalisisSaludCard.svelte'
 
 	let identificacion = $state('')
 	let numero = $state('')
@@ -175,6 +176,12 @@
 						{#if filas[0].fecnac} · {calcularEdad(filas[0].fecnac)}{/if}
 						{#if filas[0].entidad} · {filas[0].entidad}{/if}
 					</p>
+				{/if}
+
+				{#if filas.some((f) => examenRealizado(f))}
+					<div class="mb-5">
+						<AnalisisSaludCard examenes={filas} genero={filas[0].genero} titulo="Análisis de salud" />
+					</div>
 				{/if}
 
 				{#each grupos as g (g.fecha)}

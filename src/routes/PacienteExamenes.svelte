@@ -28,6 +28,8 @@
 	import Page from '../lib/ui/Page.svelte'
 	import StatusPill from '../lib/ui/StatusPill.svelte'
 	import HoverCard from '../lib/ui/HoverCard.svelte'
+	import AnalisisSaludCard from '../lib/ui/AnalisisSaludCard.svelte'
+	import GraficosSaludCard from '../lib/ui/GraficosSaludCard.svelte'
 
 	let { id }: { id: string } = $props()
 
@@ -177,6 +179,16 @@
 				<p class="text-[10px] font-bold uppercase tracking-wide text-emerald-600/80">Emitidos</p>
 			</div>
 		</div>
+		{#if examenes.some((e) => examenRealizado(e))}
+			<div class="mb-4">
+				<AnalisisSaludCard examenes={examenes} genero={paciente?.genero} titulo="Análisis de salud del paciente" />
+			</div>
+			{#if examenes.some((e) => examenRealizado(e) && e.tipo && ['3', '5', '8'].includes(e.tipo))}
+				<div class="mb-4">
+					<GraficosSaludCard examenes={examenes} genero={paciente?.genero} />
+				</div>
+			{/if}
+		{/if}
 		{#if fechas.length > 1}
 			<div class="mb-4 flex flex-wrap gap-2">
 				{#each fechas as f (f)}
