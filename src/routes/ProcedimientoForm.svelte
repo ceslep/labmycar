@@ -136,7 +136,7 @@
 	}
 </script>
 
-<Page titulo={editando ? 'Editar procedimiento' : 'Nuevo procedimiento'} subtitulo={editando ? `Código: ${f.codigo}` : 'Registre un examen en el catálogo'}>
+<Page thing="building" titulo={editando ? 'Editar procedimiento' : 'Nuevo procedimiento'} subtitulo={editando ? `Código: ${f.codigo}` : 'Registre un examen en el catálogo'}>
 	{#snippet actions()}
 		<div class="flex gap-2">
 			{#if editando && ind}

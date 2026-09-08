@@ -77,8 +77,8 @@ export interface Examen {
 	info?: string
 }
 
-export function examenRealizado(e: Examen): boolean {
-	return (e.realizado ?? '') === 'S'
+export function examenRealizado(e?: Examen | null): boolean {
+	return (e?.realizado ?? '') === 'S'
 }
 
 // ---------- Catálogo de procedimientos (tabla `procedimientos`) ----------

@@ -11,6 +11,7 @@ export type RouteName =
 	| 'configuracion'
 	| 'procedimiento-form'
 	| 'panel'
+	| 'admin'
 
 export interface RouteState {
 	name: RouteName
@@ -39,7 +40,8 @@ const definiciones: Array<{ pattern: string; name: RouteName }> = [
 	{ pattern: '/configuracion', name: 'configuracion' },
 	{ pattern: '/procedimiento/nuevo', name: 'procedimiento-form' },
 	{ pattern: '/procedimiento/:codigo', name: 'procedimiento-form' },
-	{ pattern: '/panel', name: 'panel' }
+	{ pattern: '/panel', name: 'panel' },
+	{ pattern: '/admin', name: 'admin' }
 ]
 
 const compiladas: Compilada[] = definiciones.map((d) => {

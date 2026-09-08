@@ -103,6 +103,7 @@
 </script>
 
 <Page
+	thing="patient"
 	titulo={editando ? 'Editar paciente' : 'Nuevo paciente'}
 	subtitulo={editando && f.identificacion ? `Identificación: ${f.identificacion}` : 'Registre los datos del paciente'}
 >

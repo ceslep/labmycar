@@ -31,6 +31,31 @@ export async function getConfiguracion(): Promise<Configuracion | null> {
 	return r?.msg && r.data ? r.data : null
 }
 
+/** Configuración ligera (nombre/corto/logo) para arranque y portal. */
+export async function getConfiguracionPublica(): Promise<Configuracion | null> {
+	try {
+		const r = await http<EnvolturaConfiguracion>('configPublica.php')
+		return r?.msg && r.data ? r.data : null
+	} catch {
+		return null
+	}
+}
+
+/** Autenticación: devuelve el token si la clave (T.P.) es correcta. */
+export interface LoginRespuesta {
+	msg?: boolean
+	token?: string
+	nombre?: string
+}
+
+export async function loginApi(clave: string): Promise<LoginRespuesta | null> {
+	try {
+		return (await http<LoginRespuesta>('login.php', { method: 'POST', body: { clave } })) ?? null
+	} catch {
+		return null
+	}
+}
+
 export async function guardarConfiguracion(cfg: Configuracion): Promise<boolean> {
 	try {
 		await http('guardarConfiguracion.php', { method: 'POST', body: { ...cfg, tabla: 'configuracion' } })
@@ -46,8 +71,8 @@ export async function guardarConfiguracion(cfg: Configuracion): Promise<boolean>
 
 export async function getPacientes(criterio = ''): Promise<Paciente[]> {
 	try {
-		if (!criterio) return await http<Paciente[]>('getPacientes.php')
-		return await http<Paciente[]>('getPacientes.php', { method: 'POST', body: { criterio } })
+		if (!criterio) return (await http<Paciente[]>('getPacientes.php')) ?? []
+		return (await http<Paciente[]>('getPacientes.php', { method: 'POST', body: { criterio } })) ?? []
 	} catch {
 		return []
 	}
@@ -77,7 +102,7 @@ export async function guardarPaciente(p: Paciente): Promise<boolean> {
 
 export async function getPacientesFecha(fecha: string): Promise<Paciente[]> {
 	try {
-		return await http<Paciente[]>('getPacientesFecha.php', { method: 'POST', body: { fecha } })
+		return (await http<Paciente[]>('getPacientesFecha.php', { method: 'POST', body: { fecha } })) ?? []
 	} catch {
 		return []
 	}
@@ -109,7 +134,7 @@ export interface ExamenFechaRow {
 
 export async function getExamenesFecha(fecha: string): Promise<ExamenFechaRow[]> {
 	try {
-		return await http<ExamenFechaRow[]>('getExamenesFecha.php', { method: 'POST', body: { fecha } })
+		return (await http<ExamenFechaRow[]>('getExamenesFecha.php', { method: 'POST', body: { fecha } })) ?? []
 	} catch {
 		return []
 	}
@@ -152,12 +177,203 @@ export interface ExamenPublico {
 
 export async function examenesPacientePublico(identificacion: string, numero: string): Promise<ExamenPublico[]> {
 	try {
-		return await http<ExamenPublico[]>('getExamenesPaciente2.php', {
+		return (await http<ExamenPublico[]>('getExamenesPaciente2.php', {
 			method: 'POST',
 			body: { identificacion, numero }
-		})
+		})) ?? []
 	} catch {
 		return []
+	}
+}
+
+/** Cambia la entidad de un examen (endpoint libphp/setEntidad.php). */
+export async function setEntidadExamen(
+	identificacion: string,
+	fecha: string,
+	codexamen: string,
+	entidad: string
+): Promise<boolean> {
+	try {
+		const r = await http<{ msg?: boolean }>('setEntidad.php', {
+			method: 'POST',
+			body: { identificacion, fecha, codexamen, entidad }
+		})
+		return r?.msg === true
+	} catch {
+		return false
+	}
+}
+
+/** Resultado de la búsqueda avanzada de pacientes (libphp/panelPacientes.php). */
+export interface PacienteBusqueda {
+	identificacion?: string
+	nombre_completo?: string
+	fecnac?: string
+	genero?: string
+	telefono?: string
+	telefono_movil?: string
+	correo?: string
+	ciudad_residencia?: string
+	entidad?: string
+	total_visitas?: string
+	ultima_visita?: string
+	total_examenes?: string
+	con_resultados?: string
+}
+
+export interface CriteriosPaciente {
+	identificacion?: string
+	nombres?: string
+	telefono?: string
+	ciudad?: string
+	entidad?: string
+	soloConResultados?: boolean
+}
+
+export async function panelPacientes(criterios: CriteriosPaciente): Promise<PacienteBusqueda[]> {
+	try {
+		const cuerpo = {
+			identificacion: criterios.identificacion ?? '',
+			nombres: criterios.nombres ?? '',
+			telefono: criterios.telefono ?? '',
+			ciudad: criterios.ciudad ?? '',
+			entidad: criterios.entidad ?? '',
+			solo_con_resultados: criterios.soloConResultados ? '1' : '0',
+			limit: 50
+		}
+		return (await http<PacienteBusqueda[]>('panelPacientes.php', { method: 'POST', body: cuerpo })) ?? []
+	} catch {
+		return []
+	}
+}
+
+/** Datos del módulo Admin (equivalente SPA de admin.php). */export interface AdminFila {
+	identificacion?: string
+	fecha?: string
+	entidad?: string
+	codexamen?: string
+	realizado?: string
+	paciente?: string
+	genero?: string
+	examen?: string
+	examen_tabla?: string
+	examen_tipo?: string
+	resumen?: string
+}
+
+export interface AdminDatos {
+	success?: boolean
+	stats?: {
+		total?: number
+		realizados?: number
+		pendientes?: number
+		hoy?: number
+		ayer?: number
+		ultimos14?: number
+		pacientes?: number
+		visitas?: number
+		tasa_realizacion?: number
+		promedio_diario?: number
+		hoy_vs_ayer?: number
+	}
+	charts?: {
+		tendencia_labels?: string[]
+		tendencia_data?: number[]
+		entidad_labels?: string[]
+		entidad_data?: number[]
+		genero_labels?: string[]
+		genero_data?: number[]
+		tipo_labels?: string[]
+		tipo_data?: number[]
+		estadoEntidad_labels?: string[]
+		estadoEntidad_realizados?: number[]
+		estadoEntidad_pendientes?: number[]
+	}
+	health?: {
+		condiciones?: Array<{ label?: string; total?: number }>
+		genero?: Record<string, number>
+		edad?: Record<string, number>
+		tabla?: Record<string, number>
+		total?: number
+	}
+	tablas?: Array<{ tabla?: string; nombre?: string }>
+	entidades?: string[]
+	total?: number
+	page?: number
+	pages?: number
+	filas?: AdminFila[]
+}
+
+export interface CriteriosAdmin {
+	fechaInicio?: string
+	fechaFin?: string
+	entidad?: string
+	buscar?: string
+	estado?: string
+	tabla?: string
+	page?: number
+	perPage?: number
+	analisis?: boolean
+	analisisDesde?: string
+	analisisHasta?: string
+}
+
+/** Datos de pacientes por lista de identificaciones (tarjetas del Panel). */
+export interface NombrePaciente {
+	identificacion?: string
+	nombre_completo?: string
+	fecnac?: string
+	genero?: string
+	entidad?: string
+}
+
+export async function nombresPacientes(ids: string[]): Promise<NombrePaciente[]> {
+	const limpios = Array.from(new Set(ids.filter(Boolean))).slice(0, 600)
+	if (limpios.length === 0) return []
+	try {
+		return (await http<NombrePaciente[]>('panelPacientesPorIds.php', {
+			method: 'POST',
+			body: { ids: limpios }
+		})) ?? []
+	} catch {
+		return []
+	}
+}
+
+export interface ResultadoMigracion {
+	msg?: boolean
+	resumen?: Array<{ tabla?: string; duplicados_eliminados?: number; indice_unico?: string }>
+	errores?: string[]
+}
+
+/** Ejecuta la migración de índices (dedupe + claves únicas). Idempotente. */
+export async function migracionIndices(): Promise<ResultadoMigracion | null> {
+	try {
+		const r = await http<ResultadoMigracion>('migracion_indices.php', { method: 'POST', body: {} })
+		return r ?? null
+	} catch {
+		return null
+	}
+}
+
+export async function adminDatos(criterios: CriteriosAdmin): Promise<AdminDatos | null> {	try {
+		const cuerpo = {
+			fecha_inicio: criterios.fechaInicio ?? '',
+			fecha_fin: criterios.fechaFin ?? '',
+			entidad: criterios.entidad ?? '',
+			buscar: criterios.buscar ?? '',
+			estado: criterios.estado ?? '',
+			tabla: criterios.tabla ?? '',
+			page: criterios.page ?? 1,
+			per_page: criterios.perPage ?? 25,
+			analisis: criterios.analisis ? '1' : '0',
+			analisis_desde: criterios.analisisDesde ?? '',
+			analisis_hasta: criterios.analisisHasta ?? ''
+		}
+		const r = await http<AdminDatos>('adminDatos.php', { method: 'POST', body: cuerpo })
+		return r ?? null
+	} catch {
+		return null
 	}
 }
 
@@ -168,8 +384,8 @@ export async function examenesPacientePublico(identificacion: string, numero: st
 /** Exámenes de un paciente (criterio = identificación) o globales si vacío. */
 export async function examenesPaciente(criterio: string): Promise<Examen[]> {
 	try {
-		if (!criterio) return await http<Examen[]>('getExamenesPaciente.php')
-		return await http<Examen[]>('getExamenesPaciente.php', { method: 'POST', body: { criterio } })
+		if (!criterio) return (await http<Examen[]>('getExamenesPaciente.php')) ?? []
+		return (await http<Examen[]>('getExamenesPaciente.php', { method: 'POST', body: { criterio } })) ?? []
 	} catch {
 		return []
 	}
@@ -177,10 +393,10 @@ export async function examenesPaciente(criterio: string): Promise<Examen[]> {
 
 export async function examenesPacienteFecha(identificacion: string, fecha: string): Promise<Examen[]> {
 	try {
-		return await http<Examen[]>('getExamenesPacienteFecha.php', {
+		return (await http<Examen[]>('getExamenesPacienteFecha.php', {
 			method: 'POST',
 			body: { identificacion, fecha }
-		})
+		})) ?? []
 	} catch {
 		return []
 	}
@@ -195,7 +411,10 @@ export async function guardarDetalle(
 	fecha: string
 ): Promise<boolean> {
 	try {
-		await http('guardarExamen.php', { method: 'POST', body: { ...datos, tabla } })
+		await http('guardarExamen.php', {
+			method: 'POST',
+			body: { ...datos, tabla, codexamen }
+		})
 		await updateExamen(codexamen, identificacion, fecha)
 		return true
 	} catch {
@@ -225,7 +444,7 @@ export async function eliminarExamen(identificacion: string, fecha: string): Pro
 
 export async function getProcedimientos(): Promise<Procedimiento[]> {
 	try {
-		return await http<Procedimiento[]>('getProcedimientos.php')
+		return (await http<Procedimiento[]>('getProcedimientos.php')) ?? []
 	} catch {
 		return []
 	}
@@ -275,10 +494,10 @@ export async function eliminarProcedimiento(ind: string | number): Promise<boole
 
 export async function getSeleccionados(identificacion: string, fecha: string): Promise<Procedimiento[]> {
 	try {
-		return await http<Procedimiento[]>('getSeleccionados.php', {
+		return (await http<Procedimiento[]>('getSeleccionados.php', {
 			method: 'POST',
 			body: { identificacion, fecha }
-		})
+		})) ?? []
 	} catch {
 		return []
 	}
@@ -319,7 +538,7 @@ export async function getUniConst(codexamen: string): Promise<UniConst> {
 
 export async function getExamenesWithItems(): Promise<CodExamen[]> {
 	try {
-		return await http<CodExamen[]>('getExamenesWithItems.php')
+		return (await http<CodExamen[]>('getExamenesWithItems.php')) ?? []
 	} catch {
 		return []
 	}

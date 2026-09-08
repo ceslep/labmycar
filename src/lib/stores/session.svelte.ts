@@ -1,13 +1,15 @@
 const KEY = 'labmycar:sesion'
+import { token, limpiarToken } from './token.svelte'
 
 function leerSesion(): boolean {
 	if (typeof sessionStorage === 'undefined') return false
 	return sessionStorage.getItem(KEY) === '1'
 }
 
-export const authed = $state({ value: leerSesion() })
+export const authed = $state({ value: leerSesion() && token.value !== '' })
 
 export function iniciarSesion(): void {
+	if (!token.value) return
 	authed.value = true
 	try {
 		sessionStorage.setItem(KEY, '1')
@@ -18,6 +20,7 @@ export function iniciarSesion(): void {
 
 export function cerrarSesion(): void {
 	authed.value = false
+	limpiarToken()
 	try {
 		sessionStorage.removeItem(KEY)
 	} catch {
@@ -26,5 +29,5 @@ export function cerrarSesion(): void {
 }
 
 export function restaurarSesion(): void {
-	authed.value = leerSesion()
+	authed.value = leerSesion() && token.value !== ''
 }

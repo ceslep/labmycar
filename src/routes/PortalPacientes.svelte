@@ -4,6 +4,7 @@
 	import { cargarImpresion, htmlReporteExamen } from '../lib/reportes/print'
 	import { verReporte } from '../lib/stores/reportevista.svelte'
 	import { navigate } from '../lib/router.svelte'
+	import { estadoConfig } from '../lib/stores/configapp.svelte'
 	import type { Paciente } from '../lib/models/models'
 	import { examenRealizado, nombreCompletoPaciente } from '../lib/models/models'
 	import { calcularEdad, formatearFechaLarga } from '../lib/utils/format'
@@ -89,27 +90,31 @@
 	}
 </script>
 
-<div class="flex min-h-dvh flex-col" style="background: linear-gradient(160deg,#161569 0%,#1a1a80 40%,#0e7490 100%)">
-	<header class="flex items-center justify-between px-6 py-4">
-		<div class="flex items-center gap-2.5 text-white">
-			<div class="flex h-9 w-9 items-center justify-center rounded-lg bg-white/15 ring-1 ring-white/30">
-				<Icon nombre="lab" tam={19} />
-			</div>
-			<div>
-				<p class="text-[15px] font-extrabold leading-tight">Consulta de resultados</p>
-				<p class="text-[11px] text-white/70">Portal del paciente</p>
+<div class="flex min-h-dvh flex-col" style="background: linear-gradient(160deg,#0a7cff 0%,#0053bf 40%,#0e7490 100%)">
+	<header class="flex items-center justify-between gap-2 px-4 py-3 sm:px-6 sm:py-4">
+		<div class="flex min-w-0 items-center gap-2.5 text-white">
+			{#if estadoConfig.logoData}
+				<img src={estadoConfig.logoData} alt="Logo" class="h-9 w-9 shrink-0 rounded-lg bg-white/80 object-contain p-0.5 ring-1 ring-white/40" />
+			{:else}
+				<div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white/15 ring-1 ring-white/30">
+					<Icon nombre="lab" tam={19} />
+				</div>
+			{/if}
+			<div class="min-w-0">
+				<p class="truncate text-[15px] font-extrabold leading-tight">Consulta de resultados</p>
+				<p class="truncate text-[11px] text-white/70">Portal del paciente</p>
 			</div>
 		</div>
 		<button
-			class="rounded-xl bg-white/15 px-4 py-2 text-xs font-bold uppercase tracking-wide text-white ring-1 ring-white/30 transition hover:bg-white/25"
+			class="shrink-0 rounded-xl bg-white/15 px-3 py-2 text-[11px] font-bold uppercase tracking-wide text-white ring-1 ring-white/30 transition hover:bg-white/25 sm:px-4 sm:text-xs"
 			onclick={() => navigate('/login')}
 		>
-			Acceso del laboratorio
+			Acceso laboratorio
 		</button>
 	</header>
 
-	<main class="mx-auto w-full max-w-3xl flex-1 px-4 pb-12 pt-6 sm:px-6">
-		<div class="rounded-3xl bg-white p-7 shadow-2xl">
+	<main class="mx-auto w-full max-w-3xl flex-1 px-4 pb-12 pt-5 sm:px-6 sm:pt-6">
+		<div class="rounded-3xl bg-white p-5 shadow-2xl sm:p-7">
 			<h1 class="text-xl font-extrabold text-neutral-800">Consulte sus resultados</h1>
 			<p class="mt-1 text-sm text-neutral-500">
 				Ingrese su número de identificación y su <b>número verificador</b> (año de nacimiento o los 4 últimos
@@ -149,7 +154,7 @@
 
 			<button
 				class="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl py-3 text-[15px] font-bold text-white shadow-lg transition hover:brightness-110 disabled:opacity-60"
-				style="background: linear-gradient(135deg,#161569,#0e7490)"
+				style="background: linear-gradient(135deg,#0a7cff,#0e7490)"
 				onclick={consultar}
 				disabled={buscando}
 			>
@@ -181,22 +186,26 @@
 							{#each g.filas as f (f.codexamen)}
 								<HoverCard>
 									<div class="flex items-center gap-3 p-3.5">
-										<div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#161569] to-[#0e7490] text-white">
-											<Icon nombre="lab" tam={19} />
+										<div
+											class="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-[#0a7cff] to-[#0e7490] text-white"
+										>
+											<Icon nombre="lab" tam={20} />
 										</div>
 										<div class="min-w-0 flex-1">
 											<p class="truncate text-sm font-bold text-neutral-800">{f.examen ?? f.codexamen}</p>
-											<p class="text-[11px] text-neutral-400">
+											<p class="truncate text-[11px] text-neutral-400">
 												{examenRealizado(f) ? 'Resultado disponible' : 'En proceso'}
 											</p>
 										</div>
-										<StatusPill
-											texto={examenRealizado(f) ? 'Realizado' : 'Pendiente'}
-											icono={examenRealizado(f) ? 'check' : 'reloj'}
-											color={examenRealizado(f) ? 'emerald' : 'amber'}
-										/>
+										<div class="hidden shrink-0 sm:block">
+											<StatusPill
+												texto={examenRealizado(f) ? 'Realizado' : 'Pendiente'}
+												icono={examenRealizado(f) ? 'check' : 'reloj'}
+												color={examenRealizado(f) ? 'emerald' : 'amber'}
+											/>
+										</div>
 										<button
-											class="inline-flex items-center gap-1.5 rounded-lg bg-neutral-100 px-3 py-1.5 text-xs font-bold text-neutral-700 transition hover:bg-brand hover:text-white disabled:opacity-40"
+											class="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-neutral-100 px-3 py-1.5 text-xs font-bold text-neutral-700 transition hover:bg-brand hover:text-white disabled:opacity-40"
 											disabled={!examenRealizado(f)}
 											onclick={() => imprimir(f)}
 											title="Ver e imprimir reporte (PDF)"

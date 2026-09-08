@@ -1,5 +1,7 @@
 <?php
 require_once("datos_conexion.php");
+require_once('api_guard.php');
+exigirToken();
 
 $codexamen=$datos->codexamen;
 $campo=$datos->campo;

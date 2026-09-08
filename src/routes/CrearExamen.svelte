@@ -110,6 +110,7 @@
 </script>
 
 <Page
+	thing="laboratory"
 	titulo="Nuevo examen"
 	subtitulo={ETAPAS[paso - 1]}
 	iconoAtras={paso === 1}

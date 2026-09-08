@@ -9,5 +9,6 @@ $stmt->bind_param("ss",$criterio,$criterio);
 $stmt->execute();
 $result=$stmt->get_result();
 echo json_encode(["msg"=>true,"data"=>$result->fetch_all(MYSQLI_ASSOC)]);
+else echo json_encode(["msg"=>true,"data"=>[]]);
 $stmt->close();
 $mysqli->close();

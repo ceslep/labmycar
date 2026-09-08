@@ -11,6 +11,7 @@
 	import EmptyState from '../lib/ui/EmptyState.svelte'
 	import HoverCard from '../lib/ui/HoverCard.svelte'
 	import StatusPill from '../lib/ui/StatusPill.svelte'
+import Thing from '../lib/ui/Thing.svelte'
 
 	let vista = $state<'hoy' | 'dias'>('hoy')
 	let pacientesHoy = $state<Paciente[]>([])
@@ -82,11 +83,12 @@
 	}
 </script>
 
-<div class="mx-auto w-full max-w-5xl px-4 py-6 sm:px-6">
-	<div class="mb-5 flex flex-wrap items-center justify-between gap-3">
-		<div>
-			<h1 class="text-xl font-extrabold tracking-tight text-neutral-800">Resultados</h1>
-			<p class="text-sm text-neutral-500">
+<div class="mx-auto w-full max-w-5xl px-5 py-8 sm:px-8">
+	<div class="mb-6 flex flex-wrap items-center justify-between gap-3">
+		<Thing nombre="medical-report" tam={40} clase="drop-shadow-sm" />
+		<div class="min-w-0 flex-1">
+			<h1 class="text-2xl font-bold tracking-[-0.02em] text-neutral-900">Resultados</h1>
+			<p class="mt-0.5 text-sm text-neutral-500">
 				{#if vista === 'hoy'}
 					Pacientes con exámenes el {formatearFechaMedia(hoyISO())}
 				{:else}
@@ -121,6 +123,7 @@
 			<Loader texto="Consultando exámenes del día…" />
 		{:else if pacientesHoy.length === 0}
 			<EmptyState
+				thing="stethoscope"
 				icono="calendario"
 				titulo="Sin exámenes hoy"
 				subtitulo="No hay pacientes con exámenes registrados para la fecha de hoy."
@@ -130,7 +133,7 @@
 				{#each pacientesHoy as p (p.identificacion)}
 					<HoverCard onclick={() => abrir(p)}>
 						<div class="flex items-center gap-3 p-4">
-							<div class="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-[#161569] to-[#0e7490] font-extrabold text-white">
+							<div class="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-[#0a7cff] to-[#0e7490] font-extrabold text-white">
 								{nombreCompletoPaciente(p)
 									.split(/\s+/)
 									.slice(0, 2)

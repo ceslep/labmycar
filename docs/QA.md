@@ -49,14 +49,23 @@ Para al menos un paciente de prueba, registrar y guardar cada tipo y verificar q
       verlas en el registro.
 
 ## 7. Panel y portal
-- [ ] Panel "Por fecha": resumen del día correcto; enlace a paciente.
-- [ ] Panel "Buscar paciente": resultados por id/nombre.
+- [ ] Panel "Por fecha": resumen del día correcto; enlace a paciente. **Consultar un rango que incluya
+      días sin exámenes no debe dar error de consola (listas vacías normalizadas).**
+- [ ] Panel "Buscar paciente": resultados por id/nombre (búsqueda avanzada y estadísticas).
+- [ ] Resumen "Por entidad" clicable, Hoy/Ayer, "Mostrar más", exportar CSV.
+- [ ] Cambiar entidad de un examen desde el desplegable (requiere `setEntidad.php` sincronizado).
 - [ ] Portal `/portal` (sin login): consultar con identificación + año de nacimiento o 4
       últimos del teléfono; solo se imprime reportes "Realizado".
 
-## 8. Build / despliegue
+## 8. Bloqueo normativo de resultados emitidos
+- [ ] Guardar un resultado pendiente → el examen pasa a "Realizado" y al abrirlo queda **solo lectura**
+      (campos deshabilitados, candado, sin Guardar).
+- [ ] Intentar re-guardar por la SPA no debe funcionar; el servidor responde "Resultado ya realizado".
+- [ ] "Imprimir" de un resultado emitido funciona sin intentar guardar.
+
+## 9. Build / despliegue
 - [ ] `npm run check` → 0 errores/0 warnings.
 - [ ] `npm run build` → OK.
 - [ ] `npm run build:app` y subir `dist/` a `/libphp/app/`; abrir la URL pública y repetir
-      las pruebas 1–7 (sin CORS, mismo origen).
+      las pruebas 1–8 (sin CORS, mismo origen).
 - [ ] Responsive: ≥900 px barra lateral; <900 px barra inferior móvil.

@@ -200,6 +200,8 @@ export const esquemas: Record<string, EsquemaExamen> = {
 	}
 }
 
+import type { NombreThing } from '../ui/Thing.svelte'
+
 export const NOMBRES_TIPO: Record<string, string> = {
 	1: 'Examen (valoración)',
 	2: 'Examen (valoración)',
@@ -208,6 +210,29 @@ export const NOMBRES_TIPO: Record<string, string> = {
 	5: 'Cuadro hemático (hemograma)',
 	6: 'Frotis vaginal',
 	8: 'Perfil lipídico'
+}
+
+/** Filtro CSS para teñir la gota (sangre) del parcial de orina a un amarillo claro. */
+export const FILTRO_AMARILLO = 'hue-rotate(55deg) saturate(1.3) brightness(1.7) contrast(0.82)'
+
+/** Ilustración thiings sugerida para cada tipo de examen. */
+export function thingExamen(tipo?: string): NombreThing {
+	switch (tipo) {
+		case '1':
+		case '2':
+			return 'medical-report'
+		case '3':
+		case '4':
+			return 'blood'
+		case '5':
+			return 'microscope'
+		case '6':
+			return 'stethoscope'
+		case '8':
+			return 'dna'
+		default:
+			return 'shield'
+	}
 }
 
 /** Convierte una respuesta tipada de detalle a un mapa plano de columnas. */

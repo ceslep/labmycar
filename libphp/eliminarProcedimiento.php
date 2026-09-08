@@ -1,6 +1,8 @@
 <?php
 require_once("cors.php");
 require_once("datos_conexion.php");
+require_once('api_guard.php');
+exigirToken();
 
 $ind = intval($datos->ind ?? 0);
 

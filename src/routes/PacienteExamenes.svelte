@@ -7,11 +7,14 @@
 		getInfoPaciente
 	} from '../lib/api/laboratorio'
 	import { esquemas } from '../lib/schemas/resultados'
+	import { thingExamen, FILTRO_AMARILLO } from '../lib/schemas/resultados'
+	import Thing from '../lib/ui/Thing.svelte'
 	import {
 		cargarImpresion,
 		htmlReporteExamen,
 		htmlReporteTodos,
-		primeraFechaExamen
+		primeraFechaExamen,
+		urlPrintphpExamen
 	} from '../lib/reportes/print'
 	import { verReporte } from '../lib/stores/reportevista.svelte'
 	import type { Examen, Paciente } from '../lib/models/models'
@@ -37,6 +40,11 @@
 	const filtrados = $derived(
 		fechaSeleccionada === 'Todos' ? examenes : examenes.filter((e) => e.fecha === fechaSeleccionada)
 	)
+	const resumenHistorial = $derived({
+		total: examenes.length,
+		realizados: examenes.filter((e) => examenRealizado(e)).length,
+		visitas: new Set(examenes.map((e) => e.fecha ?? '')).size
+	})
 
 	async function cargar() {
 		cargando = true
@@ -58,6 +66,21 @@
 		} else {
 			toast(`El tipo ${e.tipo ?? '?'} no tiene formulario definido todavía`, 'info')
 		}
+	}
+
+	function abrirPdfServidor(e: Examen) {
+		const url = urlPrintphpExamen({
+			identificacion: e.identificacion ?? id,
+			fecha: e.fecha ?? '',
+			codexamen: e.codexamen ?? '',
+			nombre: e.examen,
+			info: e.info,
+			nombres: paciente ? nombreCompletoPaciente(paciente) : '',
+			entidad: e.entidad,
+			tipo: e.tipo,
+			tabla: e.tabla
+		})
+		if (url) window.open(url, '_blank')
 	}
 
 	function pacienteBase(): Paciente {
@@ -105,6 +128,7 @@
 </script>
 
 <Page
+	thing="medical-report"
 	titulo={paciente ? nombreCompletoPaciente(paciente) : 'Consultando paciente…'}
 	subtitulo={paciente ? `${paciente.identificacion ?? ''}${paciente.fecnac ? ` · ${calcularEdad(paciente.fecnac)}` : ''}` : ''}
 >
@@ -133,11 +157,26 @@
 		<Loader texto="Cargando exámenes…" />
 	{:else if examenes.length === 0}
 		<EmptyState
+			thing="medical-report"
 			icono="resultados"
 			titulo="Sin exámenes registrados"
 			subtitulo="Este paciente no tiene exámenes asignados aún."
 		/>
 	{:else}
+		<div class="mb-4 grid grid-cols-3 gap-2">
+			<div class="rounded-2xl border border-neutral-200 bg-white px-3 py-2.5 text-center shadow-sm">
+				<p class="text-lg font-extrabold text-neutral-800">{resumenHistorial.visitas}</p>
+				<p class="text-[10px] font-bold uppercase tracking-wide text-neutral-400">Visitas</p>
+			</div>
+			<div class="rounded-2xl border border-neutral-200 bg-white px-3 py-2.5 text-center shadow-sm">
+				<p class="text-lg font-extrabold text-neutral-800">{resumenHistorial.total}</p>
+				<p class="text-[10px] font-bold uppercase tracking-wide text-neutral-400">Exámenes</p>
+			</div>
+			<div class="rounded-2xl border border-emerald-100 bg-emerald-50 px-3 py-2.5 text-center shadow-sm">
+				<p class="text-lg font-extrabold text-emerald-700">{resumenHistorial.realizados}</p>
+				<p class="text-[10px] font-bold uppercase tracking-wide text-emerald-600/80">Emitidos</p>
+			</div>
+		</div>
 		{#if fechas.length > 1}
 			<div class="mb-4 flex flex-wrap gap-2">
 				{#each fechas as f (f)}
@@ -155,10 +194,8 @@
 		<div class="space-y-2.5">
 			{#each filtrados as e (e.ind ?? `${e.codexamen}-${e.fecha}`)}
 				<HoverCard onclick={() => abrirRegistro(e)}>
-					<div class="flex items-center gap-4 p-4">
-						<div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#161569] to-[#0e7490] text-white">
-							<Icon nombre="lab" tam={20} />
-						</div>
+					<div class="flex items-center gap-2.5 px-3 py-3 sm:gap-4 sm:p-4">
+						<Thing nombre={thingExamen(e.tipo)} tam={38} filtro={e.tipo === '3' ? FILTRO_AMARILLO : ''} clase="shrink-0 drop-shadow-sm" />
 						<div class="min-w-0 flex-1">
 							<p class="truncate text-sm font-bold text-neutral-800">{e.examen ?? 'Examen'}</p>
 							<p class="text-[12px] text-neutral-500">
@@ -166,6 +203,11 @@
 								{#if e.entidad} · {e.entidad}{/if}
 							</p>
 						</div>
+						{#if examenRealizado(e)}
+							<span title="Resultado emitido (no modificable)">
+								<Icon nombre="candado" tam={15} clase="shrink-0 text-neutral-400" />
+							</span>
+						{/if}
 						<StatusPill
 							texto={examenRealizado(e) ? 'Realizado' : 'Pendiente'}
 							icono={examenRealizado(e) ? 'check' : 'reloj'}
@@ -181,7 +223,19 @@
 						>
 							<Icon nombre="imprimir" tam={16} />
 						</button>
-						<Icon nombre="siguiente" tam={16} clase="text-neutral-300" />
+						{#if examenRealizado(e)}
+							<button
+								class="rounded-lg p-2 text-neutral-400 transition hover:bg-neutral-100 hover:text-accent"
+								title="Abrir PDF del servidor (vista original)"
+								onclick={(ev) => {
+									ev.stopPropagation()
+									abrirPdfServidor(e)
+								}}
+							>
+								<Icon nombre="externo" tam={16} />
+							</button>
+						{/if}
+						<Icon nombre="siguiente" tam={16} clase="hidden text-neutral-300 sm:block" />
 					</div>
 				</HoverCard>
 			{/each}

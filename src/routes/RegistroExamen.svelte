@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte'
 	import {
+		examenesPacienteFecha,
 		getConfiguracion,
 		getDataHemat,
 		getHemogramaRaytoOld,
@@ -9,8 +10,8 @@
 		guardarDetalle
 	} from '../lib/api/laboratorio'
 	import type { Paciente, Procedimiento } from '../lib/models/models'
-	import { nombreCompletoPaciente } from '../lib/models/models'
-	import { esquemas, type CampoExamen } from '../lib/schemas/resultados'
+	import { nombreCompletoPaciente, examenRealizado } from '../lib/models/models'
+	import { esquemas, type CampoExamen, thingExamen, FILTRO_AMARILLO } from '../lib/schemas/resultados'
 	import { htmlReporteExamen } from '../lib/reportes/print'
 	import { verReporte } from '../lib/stores/reportevista.svelte'
 	import { navigate } from '../lib/router.svelte'
@@ -31,6 +32,7 @@
 	let legadoTipo5 = $state<Record<string, unknown> | null>(null)
 	let cargando = $state(true)
 	let guardando = $state(false)
+	let realizado = $state(false)
 	let estado = $state<Record<string, string>>({})
 
 	async function cargar() {
@@ -39,14 +41,16 @@
 			cargando = false
 			return
 		}
-		const [pac, proc, fila] = await Promise.all([
+		const [pac, proc, fila, exsHoy] = await Promise.all([
 			getInfoPaciente(id),
 			getProcedimiento(codexamen),
-			esquema.cargar(id, fecha, codexamen)
+			esquema.cargar(id, fecha, codexamen),
+			examenesPacienteFecha(id, fecha)
 		])
 		paciente = pac
 		procedimiento = proc
 		filaAnterior = fila
+		realizado = examenRealizado(exsHoy.find((x) => x.codexamen === codexamen))
 		const nuevo: Record<string, string> = {}
 		for (const c of esquema.campos) nuevo[c.clave] = ''
 		if (fila) {
@@ -107,7 +111,7 @@
 			toast('Resultados guardados correctamente')
 			navigate(`/paciente/${encodeURIComponent(paciente.identificacion)}/examenes`)
 		} else {
-			toast('No se pudieron guardar los resultados. Verifique la conexión.', 'error')
+			toast('No se pudieron guardar los resultados. Verifique la conexión o si el resultado ya fue emitido.', 'error')
 		}
 	}
 
@@ -156,12 +160,15 @@
 
 	async function imprimir() {
 		if (!esquema || !paciente?.identificacion) return
-		guardando = true
-		const ok = await guardarDetalle(esquema.tabla, construirPayload(), codexamen, paciente.identificacion, fecha)
-		guardando = false
-		if (!ok) {
-			toast('No se pudieron guardar los resultados antes de imprimir.', 'error')
-			return
+		// Si el resultado ya está emitido, no se guarda: solo se imprime/consulta.
+		if (!realizado) {
+			guardando = true
+			const ok = await guardarDetalle(esquema.tabla, construirPayload(), codexamen, paciente.identificacion, fecha)
+			guardando = false
+			if (!ok) {
+				toast('No se pudieron guardar los resultados antes de imprimir.', 'error')
+				return
+			}
 		}
 		try {
 			const [config, fila] = await Promise.all([
@@ -196,6 +203,8 @@
 </script>
 
 <Page
+	thing={thingExamen(tipo)}
+	thingFiltro={tipo === '3' ? FILTRO_AMARILLO : ''}
 	titulo={procedimiento?.nombre ?? 'Registro de resultados'}
 	subtitulo={
 		paciente
@@ -206,7 +215,7 @@
 	{#snippet actions()}
 		{#if !cargando && esquema}
 			<div class="flex flex-wrap gap-2">
-				{#if esquema.tipo === '5'}
+				{#if esquema.tipo === '5' && !realizado}
 					<button
 						class="inline-flex items-center gap-2 rounded-xl border border-accent/40 bg-sky-50 px-4 py-2.5 text-sm font-bold text-accent transition hover:bg-sky-100 disabled:opacity-60"
 						onclick={importarLan}
@@ -221,17 +230,19 @@
 					class="inline-flex items-center gap-2 rounded-xl border border-neutral-300 bg-white px-4 py-2.5 text-sm font-bold text-neutral-700 transition hover:bg-neutral-50 disabled:opacity-60"
 					onclick={imprimir}
 					disabled={guardando}
+					title="Ver e imprimir el reporte"
 				>
 					<Icon nombre="imprimir" tam={16} />
-					Imprimir
+					{realizado ? 'Imprimir / ver reporte' : 'Imprimir'}
 				</button>
 				<button
-					class="inline-flex items-center gap-2 rounded-xl bg-brand px-5 py-2.5 text-sm font-bold text-white transition hover:bg-brand-700 disabled:opacity-60"
+					class="inline-flex items-center gap-2 rounded-xl bg-brand px-5 py-2.5 text-sm font-bold text-white transition hover:bg-brand-700 disabled:opacity-60 disabled:cursor-not-allowed"
 					onclick={guardar}
-					disabled={guardando}
+					disabled={guardando || realizado}
+					title={realizado ? 'Resultado emitido: no se puede modificar por normativa' : 'Guardar resultados'}
 				>
-					<Icon nombre="check" tam={16} />
-					{guardando ? 'Guardando…' : 'Guardar resultados'}
+					<Icon nombre={realizado ? 'candado' : 'check'} tam={16} />
+					{realizado ? 'Resultado emitido' : guardando ? 'Guardando…' : 'Guardar resultados'}
 				</button>
 			</div>
 		{/if}
@@ -241,11 +252,25 @@
 		<Loader texto="Cargando datos del examen…" />
 	{:else if !esquema}
 		<EmptyState
+			thing="shield"
 			icono="alerta"
 			titulo="Tipo de examen sin vista"
 			subtitulo={`El tipo ${tipo} no tiene un formulario definido en la SPA todavía (catálogo tipo 7 u otros).`}
 		/>
 	{:else}
+		{#if realizado}
+			<div class="mb-4 flex items-start gap-3 rounded-2xl border border-amber-300 bg-amber-50 p-4 text-[13px] text-amber-900">
+				<Icon nombre="candado" tam={18} clase="mt-0.5 shrink-0" />
+				<div>
+					<p class="font-bold">Resultado realizado y emitido</p>
+					<p class="mt-0.5">
+						Por normativa, un resultado ya emitido no se puede modificar. Esta vista es de solo lectura;
+						puede imprimir o descargar el reporte.
+					</p>
+				</div>
+			</div>
+		{/if}
+
 		{#if procedimiento && (procedimiento.constante || procedimiento.unidades)}
 			<div class="mb-4 rounded-xl border border-sky-200 bg-sky-50 px-4 py-2.5 text-[13px] text-sky-800">
 				<b>Referencia:</b>
@@ -290,7 +315,8 @@
 									<textarea
 										bind:value={estado[c.clave]}
 										rows={3}
-										class="w-full rounded-xl border border-neutral-300 bg-white px-4 py-2.5 text-[15px] text-neutral-900 outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/20"
+										disabled={realizado}
+										class="w-full rounded-xl border border-neutral-300 bg-white px-4 py-2.5 text-[15px] text-neutral-900 outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/20 disabled:cursor-not-allowed disabled:bg-neutral-100 disabled:text-neutral-600"
 									></textarea>
 								</label>
 							{:else}
@@ -299,7 +325,8 @@
 									<input
 										bind:value={estado[c.clave]}
 										type="text"
-										class="w-full rounded-xl border border-neutral-300 bg-white px-4 py-2.5 text-[15px] text-neutral-900 outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/20"
+										disabled={realizado}
+										class="w-full rounded-xl border border-neutral-300 bg-white px-4 py-2.5 text-[15px] text-neutral-900 outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/20 disabled:cursor-not-allowed disabled:bg-neutral-100 disabled:text-neutral-600"
 									/>
 								</label>
 							{/if}

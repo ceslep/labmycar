@@ -141,4 +141,10 @@ $stmt->close();
 $mysqli->close();
 ```
 
-Con este endpoint la SPA habilitaría el selector de entidad por examen en el Panel.
+**Estado**: ✅ **APLICADO** — archivo `libphp/setEntidad.php` creado (2025). Con este endpoint la SPA
+muestra el selector de entidad por examen en el Panel.
+
+**Además**: `libphp/panelPacientes.php` (nuevo) — búsqueda avanzada de pacientes por identificación,
+nombres, teléfono, ciudad o entidad, con "solo con resultados" y estadísticas (visitas, exámenes,
+con resultados, última visita). Equivalente SPA de la acción `consulta_pacientes_resultados` de prt.php.
+> Nota: los nuevos .php deben sincronizarse a `/libphp` con WinSCP para funcionar en producción.

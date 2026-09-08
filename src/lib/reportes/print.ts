@@ -3,6 +3,7 @@ import { nombreCompletoPaciente, examenRealizado } from '../models/models'
 import type { EsquemaExamen } from '../schemas/resultados'
 import { getConfiguracion, getProcedimiento } from '../api/laboratorio'
 import { calcularEdad, formatearFechaLarga } from '../utils/format'
+import { getBaseUrl } from '../core/config.svelte'
 
 /** Abre una ventana de impresión en blanco (debe llamarse dentro del gestor de clic). */
 export function abrirVentanaImpresion(): Window | null {
@@ -24,30 +25,30 @@ body { font-family: 'Segoe UI', Arial, sans-serif; font-size: 11.5px; line-heigh
 @page { size: Letter; margin: 13mm 14mm; }
 .pagina { page-break-after: always; }
 .pagina:last-child { page-break-after: auto; }
-.cabecera { display: flex; gap: 14px; align-items: center; padding-bottom: 10px; border-bottom: 3px solid #161569; }
+.cabecera { display: flex; gap: 14px; align-items: center; padding-bottom: 10px; border-bottom: 3px solid #0a7cff; }
 .cabecera img { max-height: 78px; max-width: 150px; object-fit: contain; }
 .cabecera .datos { flex: 1; text-align: center; }
-.cabecera .datos h1 { margin: 0; font-size: 17px; color: #161569; letter-spacing: .4px; }
+.cabecera .datos h1 { margin: 0; font-size: 17px; color: #0a7cff; letter-spacing: .4px; }
 .cabecera .datos p { margin: 1.5px 0; font-size: 10px; color: #3f4451; }
 .cabecera .datos .nit { margin-top: 3px; font-size: 9.5px; font-weight: 700; letter-spacing: 1.2px; color: #6b7080; }
-.titulo { text-align: center; margin: 14px 0 3px; font-size: 14.5px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: #161569; }
+.titulo { text-align: center; margin: 14px 0 3px; font-size: 14.5px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: #0a7cff; }
 .subtitulo { text-align: center; margin: 0 0 11px; font-size: 10.5px; color: #555; }
 .paciente { width: 100%; border-collapse: collapse; margin-bottom: 11px; }
 .paciente td { border: 1px solid #c3c7d2; padding: 4.5px 7px; font-size: 11px; }
 .paciente .et { background: #eef0fa; font-weight: 700; width: 12%; letter-spacing: .2px; }
 table.detalle { width: 100%; border-collapse: collapse; margin-bottom: 11px; }
 table.detalle th, table.detalle td { border: 1px solid #c3c7d2; padding: 4.5px 7px; font-size: 11px; }
-table.detalle th { background: #161569; color: #ffffff; text-align: left; font-size: 10px; text-transform: uppercase; letter-spacing: .6px; }
-.grupo td { background: #eef0fa; font-weight: 800; text-transform: uppercase; font-size: 10px; letter-spacing: .6px; color: #161569; }
+table.detalle th { background: #0a7cff; color: #ffffff; text-align: left; font-size: 10px; text-transform: uppercase; letter-spacing: .6px; }
+.grupo td { background: #eef0fa; font-weight: 800; text-transform: uppercase; font-size: 10px; letter-spacing: .6px; color: #0a7cff; }
 .valor { text-align: center; font-weight: 700; }
 .obs { margin: 3px 0 8px; font-size: 11px; white-space: pre-wrap; }
 .pie { margin-top: 30px; display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; }
 .pie .nota { font-size: 9.5px; color: #6b7080; max-width: 45%; }
 .firma { text-align: center; min-width: 220px; }
 .firma img { max-height: 64px; max-width: 180px; object-fit: contain; }
-.firma .linea { border-top: 1.5px solid #16181d; margin-top: 3px; padding-top: 5px; font-size: 10.5px; font-weight: 700; color: #161569; }
+.firma .linea { border-top: 1.5px solid #16181d; margin-top: 3px; padding-top: 5px; font-size: 10.5px; font-weight: 700; color: #0a7cff; }
 .firma .cargo { font-size: 9.5px; color: #3f4451; margin-top: 2px; }
-.obs-bloque h3 { font-size: 10px; margin: 9px 0 2px; color: #161569; text-transform: uppercase; letter-spacing: .5px; }
+.obs-bloque h3 { font-size: 10px; margin: 9px 0 2px; color: #0a7cff; text-transform: uppercase; letter-spacing: .5px; }
 .referencia { margin: 0 0 9px; font-size: 10.5px; color: #3f4451; }
 `
 }
@@ -188,4 +189,63 @@ export function escribirReporte(win: Window | null, html: string): boolean {
 /** Fecha de cabecera de un reporte conjunto. */
 export function primeraFechaExamen(examenes: Examen[]): string {
 	return examenes.find((e) => e.fecha)?.fecha ?? ''
+}
+
+function construirQuery(params: Record<string, string | undefined>): string {
+	const query = Object.entries(params)
+		.filter(([, v]) => v !== undefined && v !== '')
+		.map(([k, v]) => `${k}=${encodeURIComponent(v as string)}`)
+		.join('&')
+	return query
+}
+
+/** URL del reporte individual generado por el servidor (printphp/print_examen.php), como hacía prt.php. */
+export function urlPrintphpExamen(opts: {
+	identificacion: string
+	fecha: string
+	codexamen: string
+	nombre?: string
+	nombres?: string
+	entidad?: string
+	edad?: string
+	tipo?: string
+	tabla?: string
+	info?: string
+}): string {
+	const q = construirQuery({
+		idx: Math.random().toString(36).slice(2),
+		identificacion: opts.identificacion,
+		fecha: opts.fecha,
+		nombres: opts.nombres,
+		tabla: opts.tabla,
+		info: opts.info ?? opts.nombre,
+		codexamen: opts.codexamen,
+		edad: opts.edad,
+		entidad: opts.entidad,
+		tipo: opts.tipo,
+		embedido: '1',
+		ver: '1'
+	})
+	return getBaseUrl() + 'printphp/print_examen.php?' + q
+}
+
+/** URL del reporte conjunto del paciente+fecha (printphp/imprimirTodo.php). */
+export function urlPrintphpTodo(opts: {
+	identificacion: string
+	fecha: string
+	nombres?: string
+	entidad?: string
+	edad?: string
+}): string {
+	const q = construirQuery({
+		idx: Math.random().toString(36).slice(2),
+		identificacion: opts.identificacion,
+		fecha: opts.fecha,
+		nombres: opts.nombres,
+		edad: opts.edad,
+		entidad: opts.entidad,
+		info: 'Resultados',
+		ver: '1'
+	})
+	return getBaseUrl() + 'printphp/imprimirTodo.php?' + q
 }

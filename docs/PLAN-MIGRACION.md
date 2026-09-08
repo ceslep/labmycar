@@ -38,18 +38,25 @@ src/
 | 2 | Pacientes (listado, alta, edición) | ✅ |
 | 3 | Asignación de exámenes (asistente 3 pasos) | ✅ |
 | 4 | Registro de resultados (tipos 1,2,3,4,5,6,8) + LAN + aviso esquema antiguo | ✅ código |
-| 5 | Reportes PDF en cliente (individual y todos) | ✅ código (A/B visual pendiente) |
+| 5 | Reportes PDF en cliente (individual y todos) | ✅ visor modal con vista previa (escritorio) / resultado con botón imprimir (móvil); A/B visual pendiente |
 | 6 | Configuración laboratorio + procedimientos + opciones | ✅ código |
-| 7 | Panel de gestión (por fecha y búsqueda) | ✅ código |
+| 7 | Panel de gestión | ✅ integrado estilo prt.php: rango de fechas, filtros (entidad/examen/solo realizados), impresión por examen y por paciente, historial |
 | 8 | Portal público de pacientes | ✅ código |
-| 9 | QA y despliegue | ✅ guía + build:app; **aceptación pendiente** |
+| 9 | QA y despliegue | ✅ guía + build:app; **aceptación final pendiente** |
 
 Verificación por fase: `npm run check` 0 errores/0 warnings y `npm run build` OK.
+Últimas correcciones: codexamen en tipo 1/2 (reportes vacíos), listas vacías (respuestas de 0 bytes), modal de vista previa, búsqueda de pacientes por servidor.
 
 ## Pendientes de aceptación (usuario)
-1. Confirmar el banner "Sin conexión" (detalle que muestra el login tras Ctrl+F5).
-2. Recorrer checklist de `docs/QA.md` (registro paciente → asignar → guardar → imprimir → portal).
-3. Prueba del reporte Realizado tipo 1/2 tras el arreglo A1 (codexamen).
+1. Confirmar en navegador que el Panel consulta rangos sin errores y que los reportes (modal) muestran los valores.
+2. Bloqueo normativo de resultados emitidos (probarlo: guardar un pendiente → se vuelve solo lectura; no se puede re-guardar).
+3. Opcionales: parche P6 ya aplicado (selector de entidad); admin.php: decidir reimplementarlo como sección del Panel o mantener enlace externo.
+
+## Extras incorporados tras el plan
+- Visor de reportes en **modal** (desktop) / pantalla completa con imprimir (móvil).
+- Panel integrado estilo `prt.php`: rango de fechas, filtros, resumen por entidad, tarjetas expandibles con valor, impresión por examen/paciente/fecha, WhatsApp, CSV, Hoy/Ayer, "Mostrar más", historial con resumen, selector de entidad por examen (`libphp/setEntidad.php`), búsqueda avanzada (`libphp/panelPacientes.php`).
+- **Resultados emitidos inmodificables**: solo lectura en la SPA + rechazo en `libphp/guardarExamen.php` (realizado='S').
+- Logo del laboratorio visible en login, barra lateral, portal y visor (store compartido `stores/configapp.svelte.ts`).
 
 ## Mejoras de backend propuestas (no aplicadas; ver docs/parches-libphp.md)
 P1 reasignar sin perder Realizado · P2 savePaciente UPDATE · P4 ORDER BY · P5 eliminarExamen.

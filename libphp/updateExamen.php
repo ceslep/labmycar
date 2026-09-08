@@ -1,5 +1,7 @@
 <?php
 require_once("datos_conexion.php");
+require_once('api_guard.php');
+exigirToken();
 
 $identificacion=$datos->identificacion;
 $fecha=$datos->fecha;

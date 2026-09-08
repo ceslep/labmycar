@@ -3,6 +3,8 @@
 	import Icon from './Icon.svelte'
 	import { toast } from '../stores/toast.svelte'
 	import { abrirVentanaImpresion, escribirReporte } from '../reportes/print'
+	import { estadoConfig } from '../stores/configapp.svelte'
+	import Thing from './Thing.svelte'
 
 	let iframeEl: HTMLIFrameElement | undefined = $state()
 
@@ -58,8 +60,12 @@
 		<div class="flex h-full w-full flex-col overflow-hidden bg-neutral-100 shadow-2xl sm:h-[90vh] sm:max-w-5xl sm:rounded-2xl">
 			<!-- Barra superior -->
 			<div class="flex items-center gap-2 border-b border-neutral-200 bg-white px-3 py-2.5 sm:px-4">
-				<div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-[#161569] to-[#0e7490] text-white">
-					<Icon nombre="lab" tam={17} />
+				<div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white">
+					{#if estadoConfig.logoData}
+						<img src={estadoConfig.logoData} alt="Logo" class="h-7 w-7 object-contain" />
+					{:else}
+						<Thing nombre="laboratory" tam={26} />
+					{/if}
 				</div>
 				<div class="min-w-0 flex-1">
 					<p class="truncate text-sm font-extrabold text-neutral-800">{reporteVista.titulo || 'Vista previa del reporte'}</p>

@@ -1,12 +1,34 @@
 @import 'tailwindcss';
 
+/* ============================================================================
+   Sistema de diseño “labmycar” — estética moderna tipo Apple/Google
+   ============================================================================ */
 @theme {
-	--color-brand: #161569;
-	--color-brand-600: #1d1c7f;
-	--color-brand-700: #13125c;
+	/* Acento principal (azul moderno). Si se prefiere mantener la identidad
+	   actual, cambiar --color-brand a #0a7cff (y el gradiente de login). */
+	--color-brand: #0a7cff;
+	--color-brand-600: #0066e6;
+	--color-brand-700: #0053bf;
+
+	/* Secundario para degradados/estados */
 	--color-accent: #0e7490;
+
+	/* Escala de grises neutros (Apple): fondos suaves y texto de alto contraste */
+	--color-neutral-50: #fbfbfd;
+	--color-neutral-100: #f5f5f7;
+	--color-neutral-200: #e8e8ed;
+	--color-neutral-300: #d2d2d7;
+	--color-neutral-400: #aeaeb2;
+	--color-neutral-500: #86868b;
+	--color-neutral-600: #6e6e73;
+	--color-neutral-700: #48484a;
+	--color-neutral-800: #3a3a3c;
+	--color-neutral-900: #1d1d1f;
+
+	/* Tipografía: sistema nativo (SF/Segoe) con características Apple */
 	--font-sans:
-		'Segoe UI', system-ui, -apple-system, Roboto, 'Helvetica Neue', Arial, sans-serif;
+		-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', 'Segoe UI', Roboto,
+		'Helvetica Neue', Arial, sans-serif;
 }
 
 html,
@@ -16,7 +38,145 @@ body,
 }
 
 body {
-	background-color: #f5f5f5;
-	color: #171717;
+	background-color: #f5f5f7;
+	color: #1d1d1f;
 	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+	text-rendering: optimizeLegibility;
+	font-feature-settings: 'kern' 1, 'liga' 1;
+}
+
+::selection {
+	background: rgba(10, 124, 255, 0.2);
+}
+
+/* Scrollbars sutiles */
+* {
+	scrollbar-width: thin;
+	scrollbar-color: rgba(0, 0, 0, 0.18) transparent;
+}
+*::-webkit-scrollbar {
+	width: 8px;
+	height: 8px;
+}
+*::-webkit-scrollbar-thumb {
+	background: rgba(0, 0, 0, 0.16);
+	border-radius: 999px;
+}
+*::-webkit-scrollbar-track {
+	background: transparent;
+}
+
+/* Foco accesible moderno */
+:focus-visible {
+	outline: 2px solid rgba(10, 124, 255, 0.7);
+	outline-offset: 2px;
+	border-radius: 6px;
+}
+
+/* Utilidades de la casa */
+@layer utilities {
+	/* Tarjeta flotante estilo Apple */
+	.card-apple {
+		background: rgba(255, 255, 255, 0.8);
+		backdrop-filter: blur(20px);
+		-webkit-backdrop-filter: blur(20px);
+		border: 1px solid rgba(0, 0, 0, 0.06);
+		box-shadow:
+			0 1px 2px rgba(0, 0, 0, 0.04),
+			0 8px 24px rgba(0, 0, 0, 0.06);
+	}
+	.text-subtle {
+		color: #6e6e73;
+	}
+	.hairline {
+		border-color: rgba(0, 0, 0, 0.08);
+	}
+
+	/* Texto con degradado de marca */
+	.text-grad {
+		background: linear-gradient(92deg, #0053bf, #0a7cff 45%, #0aa6b0);
+		-webkit-background-clip: text;
+		background-clip: text;
+		color: transparent;
+	}
+
+	/* Entrada suave al cambiar de página o abrir elementos */
+	.anim-in {
+		animation: animFadeUp 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+	}
+	.anim-pop {
+		animation: animPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+	}
+	.anim-float {
+		animation: animFloat 7s ease-in-out infinite;
+	}
+}
+
+/* Movimiento */
+@keyframes animFadeUp {
+	from {
+		opacity: 0;
+		transform: translateY(14px);
+	}
+	to {
+		opacity: 1;
+		transform: none;
+	}
+}
+@keyframes animPop {
+	from {
+		opacity: 0;
+		transform: scale(0.96) translateY(8px);
+	}
+	to {
+		opacity: 1;
+		transform: none;
+	}
+}
+@keyframes animFloat {
+	0%,
+	100% {
+		transform: translateY(0);
+	}
+	50% {
+		transform: translateY(-12px);
+	}
+}
+@keyframes animShine {
+	from {
+		background-position: -120% 0;
+	}
+	to {
+		background-position: 220% 0;
+	}
+}
+
+/* Botones primarios con degradado y brillo (se aplica a cualquier .bg-brand) */
+.bg-brand {
+	background-color: transparent;
+	background-image: linear-gradient(135deg, #2f9bff 0%, #0a7cff 45%, #0053bf 100%);
+}
+.hover\:bg-brand-600:hover {
+	background-image: linear-gradient(135deg, #4aa6ff, #0a7cff 55%, #0066e6);
+}
+
+/* Resplandor decorativo reutilizable */
+.blob {
+	position: absolute;
+	border-radius: 9999px;
+	filter: blur(70px);
+	pointer-events: none;
+	opacity: 0.55;
+}
+
+/* Lista de chips con scroll horizontal suave en móvil */
+.scroll-chips {
+	overflow-x: auto;
+	-webkit-overflow-scrolling: touch;
+	scrollbar-width: none;
+	flex-wrap: nowrap;
+}
+.scroll-chips::-webkit-scrollbar {
+	display: none;
 }

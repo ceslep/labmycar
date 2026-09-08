@@ -1,101 +1,97 @@
 <script lang="ts">
-	import { getPacientesFecha } from '../lib/api/laboratorio'
 	import { navigate } from '../lib/router.svelte'
 	import { hoyISO, formatearFechaLarga } from '../lib/utils/format'
-	import { toast } from '../lib/stores/toast.svelte'
 	import Icon from '../lib/ui/Icon.svelte'
-	import type { NombreIcono } from '../lib/ui/iconos'
-	import Loader from '../lib/ui/Loader.svelte'
+	import Thing from '../lib/ui/Thing.svelte'
+	import type { NombreThing } from '../lib/ui/Thing.svelte'
 
-	let cargandoHoy = $state(false)
-	let cantidadHoy = $state<number | null>(null)
-
-	async function verExamenesHoy() {
-		cargandoHoy = true
-		try {
-			const lista = await getPacientesFecha(hoyISO())
-			cantidadHoy = lista.length
-			toast(`Pacientes con exámenes hoy: ${lista.length}`, 'info')
-		} catch {
-			toast('No se pudieron cargar los exámenes del día', 'error')
-		} finally {
-			cargandoHoy = false
-		}
-	}
-
-	const accesos: Array<{ titulo: string; desc: string; icono: NombreIcono; color: string; accion: () => void }> = [
+	const accesos: Array<{
+		titulo: string
+		desc: string
+		thing: NombreThing
+		chip: string
+		tituloColor: string
+		accion: () => void
+	}> = [
 		{
 			titulo: 'Nuevo examen',
 			desc: 'Asignar exámenes a un paciente',
-			icono: 'mas',
-			color: 'from-[#161569] to-[#0e7490]',
+			thing: 'laboratory',
+			chip: 'from-sky-400 via-blue-500 to-blue-700 shadow-sky-500/40',
+			tituloColor: 'text-sky-600',
 			accion: () => navigate('/crear-examen')
 		},
 		{
 			titulo: 'Nuevo paciente',
 			desc: 'Registrar un paciente',
-			icono: 'usuarioMas',
-			color: 'from-[#0e7490] to-[#0aa6b0]',
+			thing: 'patient',
+			chip: 'from-violet-400 via-purple-500 to-fuchsia-600 shadow-violet-500/40',
+			tituloColor: 'text-violet-600',
 			accion: () => navigate('/pacientes/nuevo')
 		},
 		{
 			titulo: 'Ver pacientes',
 			desc: 'Buscar y consultar pacientes',
-			icono: 'pacientes',
-			color: 'from-[#161569] to-[#3b3aa5]',
+			thing: 'stethoscope',
+			chip: 'from-amber-400 via-orange-500 to-orange-600 shadow-orange-500/40',
+			tituloColor: 'text-orange-600',
 			accion: () => navigate('/pacientes')
 		}
 	]
 </script>
 
-<div class="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6">
+<div class="mx-auto w-full max-w-6xl px-5 py-8 sm:px-8">
 	<!-- Saludo -->
-	<div class="rounded-3xl p-8 text-white shadow-xl" style="background: linear-gradient(135deg,#161569,#0e7490)">
-		<p class="text-sm font-semibold uppercase tracking-widest text-white/70">Hoy es</p>
-		<h1 class="mt-1 text-2xl font-extrabold sm:text-3xl">{formatearFechaLarga(hoyISO())}</h1>
-		<div class="mt-5 flex flex-wrap gap-3">
+	<div
+		class="relative overflow-hidden rounded-[28px] border border-black/5 bg-white/80 p-6 shadow-[0_12px_40px_-24px_rgba(10,124,255,0.45)] backdrop-blur-xl sm:p-10"
+	>
+		<div class="pointer-events-none absolute -right-16 -top-20 h-64 w-64 rounded-full bg-brand/15 blur-2xl anim-float"></div>
+		<div class="pointer-events-none absolute -bottom-24 -left-12 h-72 w-72 rounded-full bg-accent/15 blur-2xl" style="animation:animFloat 9s ease-in-out infinite reverse"></div>
+		<img
+			src="/thiings/laboratory.png"
+			alt=""
+			aria-hidden="true"
+			class="pointer-events-none absolute -bottom-8 -right-2 hidden w-40 rotate-6 opacity-80 drop-shadow-lg md:block anim-float"
+		/>
+		<div class="relative">
+		<p class="text-[13px] font-semibold uppercase tracking-[0.08em] text-brand">Hoy es</p>
+		<h1 class="mt-2 text-3xl font-bold tracking-[-0.03em] text-neutral-900 sm:text-4xl">{formatearFechaLarga(hoyISO())}</h1>
+		<p class="mt-2 max-w-xl text-[15px] leading-relaxed text-neutral-500">
+			Gestione el trabajo del laboratorio: asigne exámenes, registre resultados y consulte los reportes.
+		</p>
+		<div class="mt-6 flex flex-wrap gap-3">
 			<button
-				class="inline-flex items-center gap-2 rounded-xl bg-white px-5 py-2.5 text-sm font-bold text-brand shadow transition hover:bg-white/90"
+				class="inline-flex items-center gap-2 rounded-2xl bg-brand px-5 py-2.5 text-sm font-semibold text-white shadow-[0_8px_20px_-8px_rgba(10,124,255,0.7)] transition hover:bg-brand-600"
 				onclick={() => navigate('/crear-examen')}
 			>
 				<Icon nombre="mas" tam={16} />
 				Examen nuevo
 			</button>
 			<button
-				class="inline-flex items-center gap-2 rounded-xl bg-white/15 px-5 py-2.5 text-sm font-bold text-white ring-1 ring-white/40 transition hover:bg-white/25"
-				onclick={verExamenesHoy}
-				disabled={cargandoHoy}
+				class="inline-flex items-center gap-2 rounded-2xl border border-black/10 bg-white/70 px-5 py-2.5 text-sm font-semibold text-neutral-700 transition hover:bg-white"
+				onclick={() => navigate('/resultados')}
 			>
 				<Icon nombre="calendario" tam={16} />
-				{cargandoHoy ? 'Consultando…' : 'Exámenes del día'}
+				Exámenes del día
 			</button>
 		</div>
-		{#if cantidadHoy !== null}
-			<p class="mt-3 text-sm text-white/85">
-				{cantidadHoy > 0
-					? `${cantidadHoy} paciente${cantidadHoy > 1 ? 's' : ''} con exámenes hoy. Abre Resultados para verlos.`
-					: 'No hay exámenes registrados hoy.'}
-			</p>
-		{/if}
-		{#if cargandoHoy}
-			<div class="mt-2 [&>div]:py-1 [&>div]:text-white"><Loader texto="" tam={18} /></div>
-		{/if}
+		</div>
 	</div>
 
 	<!-- Accesos rápidos -->
 	<div class="mt-6 grid gap-4 sm:grid-cols-3">
 		{#each accesos as a (a.titulo)}
 			<button
-				class="group rounded-2xl border border-neutral-200 bg-white p-5 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+				class="group flex flex-col items-center rounded-3xl border border-black/5 bg-white/80 p-6 text-center backdrop-blur transition hover:-translate-y-1 hover:shadow-[0_20px_48px_-24px_rgba(0,0,0,0.35)]"
 				onclick={a.accion}
 			>
 				<div
-					class="mb-3 inline-flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br text-white shadow {a.color}"
+					class="mb-4 grid h-[84px] w-[84px] place-items-center rounded-[26px] bg-gradient-to-br shadow-lg transition-transform duration-300 group-hover:-rotate-3 group-hover:scale-110 {a.chip}"
 				>
-					<Icon nombre={a.icono} tam={22} />
+					<Thing nombre={a.thing} tam={52} filtro="brightness(0) invert(1) drop-shadow(0 2px 3px rgb(0 0 0 / 0.2))" />
 				</div>
-				<p class="font-bold text-neutral-800 group-hover:text-brand">{a.titulo}</p>
-				<p class="mt-0.5 text-[13px] text-neutral-500">{a.desc}</p>
+				<p class="text-[16px] font-bold tracking-[-0.01em] {a.tituloColor}">{a.titulo}</p>
+				<p class="mt-1 text-[13px] leading-snug text-neutral-500">{a.desc}</p>
 			</button>
 		{/each}
 	</div>

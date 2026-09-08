@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte'
 	import { route, navigate, startRouter } from './lib/router.svelte'
 	import { authed, restaurarSesion } from './lib/stores/session.svelte'
+	import { cargarConfigApp } from './lib/stores/configapp.svelte'
 	import ConnectionBanner from './lib/ui/ConnectionBanner.svelte'
 	import Toasts from './lib/ui/Toasts.svelte'
 	import ReporteVista from './lib/ui/ReporteVista.svelte'
@@ -18,10 +19,12 @@
 	import ConfiguracionPage from './routes/Configuracion.svelte'
 	import ProcedimientoForm from './routes/ProcedimientoForm.svelte'
 	import Panel from './routes/Panel.svelte'
+	import Admin from './routes/Admin.svelte'
 
 	onMount(() => {
 		restaurarSesion()
 		startRouter()
+		cargarConfigApp()
 	})
 
 	const esPortal = $derived(route.name === 'portal')
@@ -42,7 +45,8 @@
 		<Login />
 	{:else}
 		<Shell>
-			{#key claveRuta}
+			<div class="anim-in">
+				{#key claveRuta}
 				{#if route.name === 'inicio'}
 					<Inicio />
 				{:else if route.name === 'pacientes'}
@@ -68,8 +72,11 @@
 					<ProcedimientoForm codigo={route.params.codigo} />
 				{:else if route.name === 'panel'}
 					<Panel />
+				{:else if route.name === 'admin'}
+					<Admin />
 				{/if}
-			{/key}
+				{/key}
+			</div>
 		</Shell>
 	{/if}
 	<Toasts />

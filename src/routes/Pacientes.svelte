@@ -9,6 +9,7 @@
 	import Loader from '../lib/ui/Loader.svelte'
 	import EmptyState from '../lib/ui/EmptyState.svelte'
 	import HoverCard from '../lib/ui/HoverCard.svelte'
+	import Thing from '../lib/ui/Thing.svelte'
 
 	let lista = $state<Paciente[]>([])
 	let base = $state<Paciente[]>([])
@@ -67,11 +68,12 @@
 	}
 </script>
 
-<div class="mx-auto w-full max-w-5xl px-4 py-6 sm:px-6">
-	<div class="mb-5 flex flex-wrap items-center gap-3">
-		<div class="flex-1">
-			<h1 class="text-xl font-extrabold tracking-tight text-neutral-800">Pacientes</h1>
-			<p class="text-sm text-neutral-500">
+<div class="mx-auto w-full max-w-5xl px-5 py-8 sm:px-8">
+	<div class="mb-6 flex flex-wrap items-center gap-3">
+		<Thing nombre="patient" tam={44} clase="drop-shadow-sm" />
+		<div class="min-w-0 flex-1">
+			<h1 class="text-2xl font-bold tracking-[-0.02em] text-neutral-900">Pacientes</h1>
+			<p class="mt-0.5 text-sm text-neutral-500">
 				{lista.length > 0 ? `${lista.length} paciente${lista.length > 1 ? 's' : ''} registrados` : ''}
 			</p>
 		</div>
@@ -115,7 +117,7 @@
 			</button>
 		</EmptyState>
 	{:else if filtrados.length === 0}
-		<EmptyState icono="buscar" titulo="Sin resultados" subtitulo="Ningún paciente coincide con la búsqueda." />
+		<EmptyState thing="patient" icono="buscar" titulo="Sin resultados" subtitulo="Ningún paciente coincide con la búsqueda." />
 	{:else}
 		<div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
 			{#each filtrados as p (p.identificacion)}

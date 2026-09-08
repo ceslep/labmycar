@@ -1,111 +1,92 @@
 <script lang="ts">
 	import { onMount } from 'svelte'
-	import { getConfiguracion } from '../lib/api/laboratorio'
+	import { cargarConfigApp, estadoConfig } from '../lib/stores/configapp.svelte'
 	import { navigate } from '../lib/router.svelte'
 	import { iniciarSesion } from '../lib/stores/session.svelte'
-	import { serverDown, probarServidor } from '../lib/core/http.svelte'
+	import { guardarToken } from '../lib/stores/token.svelte'
+	import { loginApi } from '../lib/api/laboratorio'
+	import { probarServidor } from '../lib/core/http.svelte'
 	import Icon from '../lib/ui/Icon.svelte'
 	import Loader from '../lib/ui/Loader.svelte'
 	import { toast } from '../lib/stores/toast.svelte'
 
-	let cargando = $state(true)
-	let errorCarga = $state('')
 	let clave = $state('')
 	let error = $state('')
-	let claveCorrecta = $state('')
-	let nombreLab = $state('Laboratorio')
+	let entrando = $state(false)
 
-	async function cargarConfig() {
-		cargando = true
-		errorCarga = ''
-		try {
-			const cfg = await getConfiguracion()
-			claveCorrecta = cfg?.tarjetaPLaboratorio ?? ''
-			nombreLab = cfg?.nombreLaboratorio?.trim() || 'Laboratorio'
-		} catch (e) {
-			errorCarga = e instanceof Error ? e.message : String(e)
-		} finally {
-			cargando = false
-		}
-	}
-
-	onMount(cargarConfig)
+	onMount(cargarConfigApp)
 
 	async function probar() {
 		const ok = await probarServidor()
 		toast(ok ? 'El servidor responde correctamente' : 'El servidor sigue sin responder', ok ? 'ok' : 'error')
-		if (ok) await cargarConfig()
+		if (ok) await cargarConfigApp()
 	}
 
-	function verificar() {
+	async function verificar() {
 		const ingreso = clave.trim()
 		if (!ingreso) {
 			error = 'Ingrese la clave de acceso'
 			return
 		}
-		if (ingreso === claveCorrecta) {
+		entrando = true
+		error = ''
+		const res = await loginApi(ingreso)
+		entrando = false
+		if (res?.msg && res.token) {
+			guardarToken(res.token)
 			iniciarSesion()
 			toast('Bienvenido(a)', 'ok')
 			navigate('/inicio')
 		} else {
-			error = 'Clave incorrecta'
+			error = 'Clave incorrecta o servidor no disponible. Verifique e intente de nuevo.'
 			clave = ''
 		}
 	}
 </script>
 
 <div
-	class="flex min-h-dvh items-center justify-center px-6 py-10"
-	style="background: linear-gradient(155deg, #161569 0%, #1a1a80 45%, #0e7490 100%)"
+	class="relative flex min-h-dvh flex-col items-center justify-center overflow-hidden bg-neutral-100 px-6 py-12"
+	style="background-image: radial-gradient(circle at 15% 20%, rgba(10,124,255,0.10), transparent 45%), radial-gradient(circle at 85% 85%, rgba(14,116,144,0.10), transparent 45%);"
 >
-	<div class="w-full max-w-[400px]">
-		<div class="rounded-3xl bg-white p-8 shadow-2xl">
-			<div
-				class="mx-auto flex h-[60px] w-[60px] items-center justify-center rounded-2xl text-white shadow-lg"
-				style="background: linear-gradient(135deg, #161569, #0e7490)"
-			>
-				<Icon nombre="lab" tam={30} />
-			</div>
-			<h1 class="mt-5 text-center text-xl font-extrabold tracking-tight text-neutral-900">{nombreLab}</h1>
-			<p class="mt-1 text-center text-[13px] text-neutral-500">Ingrese su clave de acceso</p>
-
-			{#if cargando}
-				<div class="py-8"><Loader texto="Cargando configuración…" /></div>
-			{:else if errorCarga}
-				<div class="mt-6 rounded-xl border border-red-200 bg-red-50 p-4">
-					<p class="flex items-center gap-2 text-sm font-bold text-red-700">
-						<Icon nombre="alerta" tam={16} />
-						No se pudo cargar la configuración del laboratorio
-					</p>
-					<p class="mt-2 text-[13px] text-red-600">{errorCarga}</p>
-					{#if serverDown.url}
-						<p class="mt-1 break-all font-mono text-[11px] text-red-500">
-							{serverDown.url}
-							{#if serverDown.detalle} — {serverDown.detalle}{/if}
-						</p>
-					{/if}
-					<div class="mt-3 flex gap-2">
-						<button
-							class="flex-1 rounded-lg bg-red-600 px-3 py-2 text-xs font-bold uppercase tracking-wide text-white transition hover:bg-red-700"
-							onclick={() => cargarConfig()}
-						>
-							Reintentar
-						</button>
-						<button
-							class="flex-1 rounded-lg border border-red-300 px-3 py-2 text-xs font-bold uppercase tracking-wide text-red-700 transition hover:bg-red-100"
-							onclick={probar}
-						>
-							Probar servidor
-						</button>
+	<img
+		src="/thiings/microscope.png"
+		alt=""
+		aria-hidden="true"
+		class="pointer-events-none absolute -left-6 top-14 hidden w-44 opacity-25 drop-shadow-lg lg:block anim-float"
+	/>
+	<img
+		src="/thiings/stethoscope.png"
+		alt=""
+		aria-hidden="true"
+		class="pointer-events-none absolute -right-4 bottom-16 hidden w-44 opacity-25 drop-shadow-lg lg:block"
+		style="animation:animFloat 9s ease-in-out infinite reverse"
+	/>
+	<div class="w-full max-w-sm">
+		<div class="rounded-[28px] border border-black/5 bg-white p-8 shadow-[0_20px_60px_-20px_rgba(0,0,0,0.25)] sm:p-10">
+			<div class="mb-6 text-center">
+				{#if estadoConfig.logoData}
+					<img src={estadoConfig.logoData} alt="Logo del laboratorio" class="mx-auto mb-4 h-20 object-contain" />
+				{:else}
+					<div
+						class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl text-white shadow-sm"
+						style="background: linear-gradient(135deg,#0a7cff,#0e7490)"
+					>
+						<Icon nombre="lab" tam={28} />
 					</div>
-				</div>
+				{/if}
+				<h1 class="text-[26px] font-bold tracking-[-0.02em] text-neutral-900">{estadoConfig.nombreLab}</h1>
+				<p class="mt-1 text-sm text-neutral-500">Ingrese su clave de acceso</p>
+			</div>
+
+			{#if !estadoConfig.loaded}
+				<div class="py-6"><Loader texto="Cargando configuración…" /></div>
 			{:else}
-				<div class="mt-6">
+				<div>
 					<input
 						bind:value={clave}
 						type="password"
 						placeholder="Clave"
-						class="w-full rounded-xl border border-neutral-300 bg-neutral-50 px-4 py-3 text-[15px] outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/20"
+						class="w-full rounded-2xl border border-black/10 bg-neutral-50 px-4 py-3 text-[15px] outline-none transition placeholder:text-neutral-400 focus:border-brand focus:bg-white focus:ring-4 focus:ring-brand/15"
 						onkeydown={(e) => {
 							if (e.key === 'Enter') verificar()
 						}}
@@ -117,18 +98,24 @@
 						</p>
 					{/if}
 					<button
-						class="mt-4 w-full rounded-xl py-3 text-[15px] font-bold text-white shadow-lg transition hover:brightness-110 active:scale-[0.99]"
-						style="background: linear-gradient(135deg, #161569, #0e7490)"
+						class="mt-4 w-full rounded-2xl bg-brand py-3 text-[15px] font-semibold text-white shadow-[0_8px_20px_-6px_rgba(10,124,255,0.6)] transition hover:bg-brand-600 active:scale-[0.99] disabled:opacity-60"
 						onclick={verificar}
+						disabled={entrando}
 					>
-						Ingresar
+						{entrando ? 'Ingresando…' : 'Ingresar'}
+					</button>
+					<button
+						class="mt-2 w-full rounded-2xl border border-black/10 py-2.5 text-[13px] font-semibold text-neutral-600 transition hover:bg-neutral-50"
+						onclick={probar}
+					>
+						Probar servidor
 					</button>
 				</div>
 			{/if}
 		</div>
-		<p class="mt-4 text-center text-[13px]">
+		<p class="mt-5 text-center text-[13px]">
 			<button
-				class="font-semibold text-white/85 underline decoration-white/50 underline-offset-2 transition hover:text-white"
+				class="font-semibold text-brand underline decoration-brand/30 underline-offset-4 transition hover:decoration-brand"
 				onclick={() => navigate('/portal')}
 			>
 				¿Es paciente? Consulte sus resultados aquí

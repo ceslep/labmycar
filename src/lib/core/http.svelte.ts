@@ -1,4 +1,23 @@
 import { getBaseUrl } from './config.svelte'
+import { token } from '../stores/token.svelte'
+
+/** Endpoints que exigen token (escrituras y datos sensibles del Panel/Admin). */
+const TOKEN_PATHS = [
+	'savePaciente.php',
+	'guardarExamen.php',
+	'guardarExamenes.php',
+	'updateExamen.php',
+	'eliminarExamen.php',
+	'eliminarProcedimiento.php',
+	'guardarProcedimiento.php',
+	'guardarConfiguracion.php',
+	'guardarItemsExamenes.php',
+	'setEntidad.php',
+	'panelPacientes.php',
+	'panelPacientesPorIds.php',
+	'adminDatos.php',
+	'migracion_indices.php'
+]
 
 /** Estado del servidor: value = caído/OK; url/detalle = último fallo para diagnóstico. */
 export const serverDown = $state({ value: false, url: '', detalle: '' })
@@ -41,13 +60,21 @@ function marcarOk(): void {
  */
 export async function http<T>(path: string, opts: HttpOptions = {}): Promise<T> {
 	const url = getBaseUrl() + path.replace(/^\//, '')
+	// Sin cabeceras personalizadas → el navegador no dispara preflight CORS.
+	// El token viaja en el body (text/plain) para los endpoints protegidos.
+	let cuerpo = opts.body === undefined ? undefined : opts.body
+	if (token.value && TOKEN_PATHS.some((p) => path.includes(p))) {
+		const base = (cuerpo && typeof cuerpo === 'object' ? { ...(cuerpo as Record<string, unknown>) } : {}) as Record<string, unknown>
+		base['token'] = token.value
+		cuerpo = base
+	}
 	let res: Response
 	const ctrl = new AbortController()
 	const tiempo = setTimeout(() => ctrl.abort(), 20000)
 	try {
 		res = await fetch(url, {
 			method: opts.method ?? 'GET',
-			body: opts.body === undefined ? undefined : JSON.stringify(opts.body),
+			body: cuerpo === undefined ? undefined : JSON.stringify(cuerpo),
 			signal: ctrl.signal
 		})
 	} catch (e) {

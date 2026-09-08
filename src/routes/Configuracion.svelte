@@ -9,11 +9,13 @@
 	import type { Configuracion, Procedimiento } from '../lib/models/models'
 	import { navigate } from '../lib/router.svelte'
 	import { toast } from '../lib/stores/toast.svelte'
+	import { aplicarConfigApp } from '../lib/stores/configapp.svelte'
 	import { colorRgb } from '../lib/utils/format'
 	import Field from '../lib/ui/Field.svelte'
 	import Icon from '../lib/ui/Icon.svelte'
 	import Loader from '../lib/ui/Loader.svelte'
 	import EmptyState from '../lib/ui/EmptyState.svelte'
+	import Thing from '../lib/ui/Thing.svelte'
 
 	type Tab = 'lab' | 'proc'
 
@@ -79,6 +81,7 @@
 		cargandoCfg = true
 		const c = await getConfiguracion()
 		cfg = c
+		aplicarConfigApp(c)
 		if (c) {
 			f.nit = c.nit ?? ''
 			f.nombreLaboratorio = c.nombreLaboratorio ?? ''
@@ -123,6 +126,7 @@
 		guardandoCfg = false
 		if (ok) {
 			toast('Configuración guardada correctamente')
+			aplicarConfigApp(payload)
 			await cargarConfig()
 		} else {
 			errorCfg = 'No se pudo guardar la configuración. Verifique la conexión.'
@@ -166,10 +170,13 @@
 	})
 </script>
 
-<div class="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6">
-	<div class="mb-5">
-		<h1 class="text-xl font-extrabold tracking-tight text-neutral-800">Configuración</h1>
-		<p class="text-sm text-neutral-500">Datos del laboratorio y catálogo de procedimientos</p>
+<div class="mx-auto w-full max-w-6xl px-5 py-8 sm:px-8">
+	<div class="mb-6 flex items-center gap-3">
+		<Thing nombre="building" tam={42} clase="drop-shadow-sm" />
+		<div>
+			<h1 class="text-2xl font-bold tracking-[-0.02em] text-neutral-900">Configuración</h1>
+			<p class="mt-0.5 text-sm text-neutral-500">Datos del laboratorio y catálogo de procedimientos</p>
+		</div>
 	</div>
 
 	<div class="mb-5 flex rounded-xl bg-neutral-200/70 p-1">
