@@ -36,7 +36,8 @@ export const ICONOS = {
 	mensaje: ['M21 11.5a8.5 8.5 0 0 1-8.5 8.5c-1.4 0-2.7-.3-3.9-.9L3 21l1.9-5.7a8.5 8.5 0 1 1 16.1-3.8z', 'M8 10h8', 'M8 14h5'],
 	candado: ['M6 11h12v9H6z', 'M8 11V7a4 4 0 1 1 8 0v4', 'M12 15v2'],
 	externo: ['M15 3h6v6', 'M10 14 21 3', 'M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6'],
-	escudo: ['M12 22s8-3.5 8-10V5l-8-3-8 3v7c0 6.5 8 10 8 10z', 'M9 11.5l2 2 4-5']
+	escudo: ['M12 22s8-3.5 8-10V5l-8-3-8 3v7c0 6.5 8 10 8 10z', 'M9 11.5l2 2 4-5'],
+	menu: ['M4 6h16', 'M4 12h16', 'M4 18h16']
 } as const
 
 export type NombreIcono = keyof typeof ICONOS
