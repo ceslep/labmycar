@@ -16,12 +16,13 @@
 		primeraFechaExamen,
 		urlPrintphpExamen
 	} from '../lib/reportes/print'
-	import { verReporte } from '../lib/stores/reportevista.svelte'
+	import { verReporte, verReporteUrl } from '../lib/stores/reportevista.svelte'
 	import type { Examen, Paciente } from '../lib/models/models'
 	import { nombreCompletoPaciente, examenRealizado } from '../lib/models/models'
 	import { navigate } from '../lib/router.svelte'
 	import { calcularEdad, formatearFechaMedia } from '../lib/utils/format'
-	import { toast } from '../lib/stores/toast.svelte'
+	import { conImprimiendo } from '../lib/stores/imprimiendo.svelte'
+import { toast } from '../lib/stores/toast.svelte'
 	import Icon from '../lib/ui/Icon.svelte'
 	import Loader from '../lib/ui/Loader.svelte'
 	import EmptyState from '../lib/ui/EmptyState.svelte'
@@ -82,7 +83,7 @@
 			tipo: e.tipo,
 			tabla: e.tabla
 		})
-		if (url) window.open(url, '_blank')
+		if (url) verReporteUrl(url, `Reporte — ${e.examen ?? 'Resultados'}`)
 	}
 
 	function pacienteBase(): Paciente {
@@ -90,43 +91,47 @@
 	}
 
 	async function imprimirUno(e: Examen) {
-		try {
-			const [config, carga] = await Promise.all([getConfiguracion(), cargarImpresion(e, esquemas)])
-			verReporte(
-				htmlReporteExamen({
-					config: config ?? {},
-					paciente: pacienteBase(),
-					examen: carga.examen,
-					procedimiento: carga.procedimiento,
-					esquema: carga.esquema,
-					fila: carga.fila
-				}),
-				`Reporte — ${carga.examen.examen ?? 'Resultados'}`
-			)
-		} catch {
-			toast('Error al preparar el reporte', 'error')
-		}
-	}
+	await conImprimiendo('Preparando reporte…', async () => {
+			try {
+				const [config, carga] = await Promise.all([getConfiguracion(), cargarImpresion(e, esquemas)])
+				verReporte(
+					await htmlReporteExamen({
+						config: config ?? {},
+						paciente: pacienteBase(),
+						examen: carga.examen,
+						procedimiento: carga.procedimiento,
+						esquema: carga.esquema,
+						fila: carga.fila
+					}),
+					`Reporte — ${carga.examen.examen ?? 'Resultados'}`
+				)
+			} catch {
+				toast('Error al preparar el reporte', 'error')
+			}
+	})
+}
 
 	async function imprimirTodos() {
-		if (filtrados.length === 0) return
-		try {
-			const fecha = fechaSeleccionada !== 'Todos' ? fechaSeleccionada : primeraFechaExamen(filtrados)
-			const [config, lista] = await Promise.all([getConfiguracion(), examenesPacienteFecha(id, fecha)])
-			const realizados = lista.filter(examenRealizado)
-			if (realizados.length === 0) {
-				toast('No hay exámenes realizados en esa fecha para imprimir', 'info')
-				return
+	await conImprimiendo('Preparando reporte…', async () => {
+			if (filtrados.length === 0) return
+			try {
+				const fecha = fechaSeleccionada !== 'Todos' ? fechaSeleccionada : primeraFechaExamen(filtrados)
+				const [config, lista] = await Promise.all([getConfiguracion(), examenesPacienteFecha(id, fecha)])
+				const realizados = lista.filter(examenRealizado)
+				if (realizados.length === 0) {
+					toast('No hay exámenes realizados en esa fecha para imprimir', 'info')
+					return
+				}
+				const items = await Promise.all(realizados.map((ex) => cargarImpresion(ex, esquemas)))
+				verReporte(
+					await htmlReporteTodos(config ?? {}, pacienteBase(), items),
+					`Resultados — ${nombreCompletoPaciente(pacienteBase())}`
+				)
+			} catch {
+				toast('Error al preparar el reporte', 'error')
 			}
-			const items = await Promise.all(realizados.map((ex) => cargarImpresion(ex, esquemas)))
-			verReporte(
-				htmlReporteTodos(config ?? {}, pacienteBase(), items),
-				`Resultados — ${nombreCompletoPaciente(pacienteBase())}`
-			)
-		} catch {
-			toast('Error al preparar el reporte', 'error')
-		}
-	}
+	})
+}
 </script>
 
 <Page
@@ -238,7 +243,7 @@
 						{#if examenRealizado(e)}
 							<button
 								class="rounded-lg p-2 text-neutral-400 transition hover:bg-neutral-100 hover:text-accent"
-								title="Abrir PDF del servidor (vista original)"
+								title="Ver PDF del servidor (vista original)"
 								onclick={(ev) => {
 									ev.stopPropagation()
 									abrirPdfServidor(e)

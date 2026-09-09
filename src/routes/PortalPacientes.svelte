@@ -8,7 +8,8 @@
 	import type { Paciente } from '../lib/models/models'
 	import { examenRealizado, nombreCompletoPaciente } from '../lib/models/models'
 	import { calcularEdad, formatearFechaLarga } from '../lib/utils/format'
-	import { toast } from '../lib/stores/toast.svelte'
+	import { conImprimiendo } from '../lib/stores/imprimiendo.svelte'
+import { toast } from '../lib/stores/toast.svelte'
 	import Icon from '../lib/ui/Icon.svelte'
 	import Loader from '../lib/ui/Loader.svelte'
 	import EmptyState from '../lib/ui/EmptyState.svelte'
@@ -61,34 +62,36 @@
 	})
 
 	async function imprimir(fila: ExamenPublico) {
-		try {
-			const examen = {
-				codexamen: fila.codexamen,
-				identificacion: fila.identificacion,
-				fecha: fila.fecha,
-				realizado: fila.realizado,
-				entidad: fila.entidad,
-				examen: fila.examen,
-				tipo: fila.tipo,
-				tabla: fila.tabla,
-				info: fila.info
+	await conImprimiendo('Preparando reporte…', async () => {
+			try {
+				const examen = {
+					codexamen: fila.codexamen,
+					identificacion: fila.identificacion,
+					fecha: fila.fecha,
+					realizado: fila.realizado,
+					entidad: fila.entidad,
+					examen: fila.examen,
+					tipo: fila.tipo,
+					tabla: fila.tabla,
+					info: fila.info
+				}
+				const [config, carga] = await Promise.all([getConfiguracion(), cargarImpresion(examen, esquemas)])
+				verReporte(
+					await htmlReporteExamen({
+						config: config ?? {},
+						paciente: pacienteDeFila(fila),
+						examen: carga.examen,
+						procedimiento: carga.procedimiento,
+						esquema: carga.esquema,
+						fila: carga.fila
+					}),
+					`Reporte — ${carga.examen.examen ?? 'Resultados'}`
+				)
+			} catch {
+				toast('Error al preparar el reporte', 'error')
 			}
-			const [config, carga] = await Promise.all([getConfiguracion(), cargarImpresion(examen, esquemas)])
-			verReporte(
-				htmlReporteExamen({
-					config: config ?? {},
-					paciente: pacienteDeFila(fila),
-					examen: carga.examen,
-					procedimiento: carga.procedimiento,
-					esquema: carga.esquema,
-					fila: carga.fila
-				}),
-				`Reporte — ${carga.examen.examen ?? 'Resultados'}`
-			)
-		} catch {
-			toast('Error al preparar el reporte', 'error')
-		}
-	}
+	})
+}
 </script>
 
 <div class="flex min-h-dvh flex-col" style="background: linear-gradient(160deg,#0a7cff 0%,#0053bf 40%,#0e7490 100%)">

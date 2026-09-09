@@ -12,12 +12,13 @@
 	} from '../lib/api/laboratorio'
 	import { esquemas } from '../lib/schemas/resultados'
 	import { cargarImpresion, htmlReporteExamen, htmlReporteTodos, urlPrintphpExamen } from '../lib/reportes/print'
-	import { verReporte } from '../lib/stores/reportevista.svelte'
+	import { verReporte, verReporteUrl } from '../lib/stores/reportevista.svelte'
 	import { getBaseUrl } from '../lib/core/config.svelte'
 	import { navigate } from '../lib/router.svelte'
 	import { examenRealizado } from '../lib/models/models'
 	import type { Paciente } from '../lib/models/models'
-	import { toast } from '../lib/stores/toast.svelte'
+	import { conImprimiendo } from '../lib/stores/imprimiendo.svelte'
+import { toast } from '../lib/stores/toast.svelte'
 	import { hoyISO, formatearFechaMedia, sumarDiasISO, calcularEdad } from '../lib/utils/format'
 	import Icon from '../lib/ui/Icon.svelte'
 	import Loader from '../lib/ui/Loader.svelte'
@@ -201,53 +202,57 @@
 	}
 
 	async function imprimirExamen(r: ExamenFechaRow) {
-		if (!r.identificacion) return
-		try {
-			const [config, carga] = await Promise.all([
-				getConfiguracion(),
-				cargarImpresion(aExamen(r), esquemas)
-			])
-			const pac = (await getInfoPaciente(r.identificacion)) ?? { identificacion: r.identificacion }
-			verReporte(
-				htmlReporteExamen({
-					config: config ?? {},
-					paciente: pac,
-					examen: carga.examen,
-					procedimiento: carga.procedimiento,
-					esquema: carga.esquema,
-					fila: carga.fila
-				}),
-				`Reporte — ${r.nombre ?? r.codexamen ?? 'Resultados'}`
-			)
-		} catch {
-			toast('Error al preparar el reporte', 'error')
-		}
-	}
+	await conImprimiendo('Preparando reporte…', async () => {
+			if (!r.identificacion) return
+			try {
+				const [config, carga] = await Promise.all([
+					getConfiguracion(),
+					cargarImpresion(aExamen(r), esquemas)
+				])
+				const pac = (await getInfoPaciente(r.identificacion)) ?? { identificacion: r.identificacion }
+				verReporte(
+					await htmlReporteExamen({
+						config: config ?? {},
+						paciente: pac,
+						examen: carga.examen,
+						procedimiento: carga.procedimiento,
+						esquema: carga.esquema,
+						fila: carga.fila
+					}),
+					`Reporte — ${r.nombre ?? r.codexamen ?? 'Resultados'}`
+				)
+			} catch {
+				toast('Error al preparar el reporte', 'error')
+			}
+	})
+}
 
 	async function imprimirGrupo(g: GrupoDia) {
-		const realizados = g.filas.filter(examenRealizado)
-		if (realizados.length === 0) {
-			toast('No hay exámenes realizados para imprimir en este grupo', 'info')
-			return
-		}
-		try {
-			const [config, pac] = await Promise.all([
-				getConfiguracion(),
-				getInfoPaciente(g.identificacion)
-			])
-			const items = await Promise.all(realizados.map((r) => cargarImpresion(aExamen(r), esquemas)))
-			verReporte(
-				htmlReporteTodos(
-					config ?? {},
-					pac ?? { identificacion: g.identificacion },
-					items
-				),
-				`Resultados — CC ${g.identificacion}`
-			)
-		} catch {
-			toast('Error al preparar el reporte', 'error')
-		}
-	}
+	await conImprimiendo('Preparando reporte…', async () => {
+			const realizados = g.filas.filter(examenRealizado)
+			if (realizados.length === 0) {
+				toast('No hay exámenes realizados para imprimir en este grupo', 'info')
+				return
+			}
+			try {
+				const [config, pac] = await Promise.all([
+					getConfiguracion(),
+					getInfoPaciente(g.identificacion)
+				])
+				const items = await Promise.all(realizados.map((r) => cargarImpresion(aExamen(r), esquemas)))
+				verReporte(
+					await htmlReporteTodos(
+						config ?? {},
+						pac ?? { identificacion: g.identificacion },
+						items
+					),
+					`Resultados — CC ${g.identificacion}`
+				)
+			} catch {
+				toast('Error al preparar el reporte', 'error')
+			}
+	})
+}
 
 	// ---------------------------------------------------------------------------
 	// Tarjeta expandible estilo prt.php: datos del paciente + resumen de resultados
@@ -398,7 +403,7 @@
 			tabla: r.tabla,
 			edad: p?.fecnac ? String(edadAnios(p.fecnac)) : ''
 		})
-		if (url) window.open(url, '_blank')
+		if (url) verReporteUrl(url, `Reporte — ${r.nombre ?? 'Resultados'}`)
 	}
 
 	function exportarCSV() {
@@ -682,7 +687,7 @@
 								{#if examenRealizado(r)}
 									<button
 										class="rounded-lg p-1.5 text-neutral-400 transition hover:bg-neutral-100 hover:text-accent"
-										title="Abrir PDF generado por el servidor (vista original)"
+										title="Ver PDF generado por el servidor (vista original)"
 										onclick={() => abrirPdfServidor(g, r)}
 									>
 										<Icon nombre="externo" tam={15} />

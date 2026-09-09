@@ -67,6 +67,48 @@ function jsonATabla(json: unknown): string | null {
 	return null
 }
 
+/** Normaliza una clave/parámetro para emparejar sin distinguir mayúsculas, acentos ni símbolos. */
+export function normalizarClave(k: unknown): string {
+	return String(k ?? '')
+		.normalize('NFD')
+		.replace(/[\u0300-\u036f]/g, '')
+		.replace(/[^a-z0-9]/gi, '')
+		.toUpperCase()
+}
+
+/**
+ * Extrae referencias por parámetro cuando `constante2` es un arreglo JSON de
+ * filas con `parametro`/`clave`/`dato`/`nombre` y `valorReferencia` (u
+ * otras variantes como `valor_recomendado`), p. ej. el cuadro hemático o el
+ * perfil lipídico. Devuelve un mapa con la clave normalizada → referencia, o
+ * null si el campo no es un arreglo JSON utilizable.
+ */
+export function referenciasParametros(constante2?: string | null): Map<string, string> | null {
+	const crudo = String(constante2 ?? '').trim()
+	if (!crudo.startsWith('[')) return null
+	let json: unknown
+	try {
+		json = JSON.parse(crudo)
+	} catch {
+		return null
+	}
+	if (!Array.isArray(json)) return null
+	const mapa = new Map<string, string>()
+	for (const fila of json) {
+		if (!esObjetoPlano(fila)) continue
+		const referencia = String(
+			fila['valorReferencia'] ?? fila['valor_recomendado'] ?? fila['referencia'] ?? fila['rango'] ?? fila['valor'] ?? ''
+		).trim()
+		if (!referencia) continue
+		const id = fila['parametro'] ?? fila['clave'] ?? fila['dato'] ?? fila['nombre']
+		if (id === null || id === undefined) continue
+		const clave = normalizarClave(id)
+		if (!clave) continue
+		if (!mapa.has(clave)) mapa.set(clave, referencia)
+	}
+	return mapa.size > 0 ? mapa : null
+}
+
 /**
  * Convierte `constante2` en el bloque HTML de la tabla de referencia.
  * Devuelve '' si el campo está vacío. No lanza: ante un JSON inválido se cae

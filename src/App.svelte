@@ -6,6 +6,7 @@
 	import ConnectionBanner from './lib/ui/ConnectionBanner.svelte'
 	import Toasts from './lib/ui/Toasts.svelte'
 	import ReporteVista from './lib/ui/ReporteVista.svelte'
+	import ImprimiendoOverlay from './lib/ui/ImprimiendoOverlay.svelte'
 	import Login from './routes/Login.svelte'
 	import PortalPacientes from './routes/PortalPacientes.svelte'
 	import Shell from './routes/Shell.svelte'
@@ -81,4 +82,5 @@
 	{/if}
 	<Toasts />
 	<ReporteVista />
+	<ImprimiendoOverlay />
 </div>

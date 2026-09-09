@@ -3,7 +3,8 @@ import { nombreCompletoPaciente, examenRealizado } from '../models/models'
 import type { EsquemaExamen } from '../schemas/resultados'
 import { getConfiguracion, getProcedimiento } from '../api/laboratorio'
 import { calcularEdad, formatearFechaLarga } from '../utils/format'
-import { htmlTablaReferencia } from './referencia'
+import { htmlTablaReferencia, referenciasParametros, normalizarClave } from './referencia'
+import { firmaActivaParaFecha, type FirmaActiva } from './firma'
 import { getBaseUrl } from '../core/config.svelte'
 
 /** Abre una ventana de impresión en blanco (debe llamarse dentro del gestor de clic). */
@@ -92,9 +93,30 @@ function pacienteHtml(p: Paciente): string {
 	</tr></table>`
 }
 
-function cuerpoExamenHtml(d: DatosReporte): string {
+function tituloExamenHtml(d: DatosReporte): string {
+	return `<div class="titulo">${esc(d.examen.examen ?? d.procedimiento.nombre ?? 'Resultados')}</div>
+		<div class="subtitulo">${esc(formatearFechaLarga(d.examen.fecha ?? d.procedimiento.info ?? ''))}</div>`
+}
+
+/** Contenido del examen (referencias, tabla de resultados y observaciones),
+ *  sin cabecera del laboratorio ni bloque del paciente. */
+function contenidoExamenHtml(d: DatosReporte, firmas: FirmaActiva[] | null): string {
 	const { esquema, fila } = d
 	const unidad = d.procedimiento.unidades
+
+	// Cuando constante2 es un arreglo JSON de parámetros con su valorReferencia
+	// (p. ej. el cuadro hemático), la referencia va en la fila del parámetro
+	// (tercera columna) y NO se imprime la "Tabla de referencia" aparte.
+	const refs = referenciasParametros(d.procedimiento.constante2)
+	let integraRefs = false
+	if (refs && esquema) {
+		for (const ca of esquema.campos) {
+			if (refs.has(normalizarClave(ca.clave)) || refs.has(normalizarClave(ca.etiqueta))) {
+				integraRefs = true
+				break
+			}
+		}
+	}
 
 	// Construye las filas agrupadas SOLO con parámetros que tengan valor:
 	// los exámenes de varios valores (hemograma, perfil, orina...) no deben
@@ -114,7 +136,13 @@ function cuerpoExamenHtml(d: DatosReporte): string {
 			if (c.multilinea) {
 				g.filas.push(`<tr><td colspan="2">${esc(c.etiqueta)}</td><td class="valor" style="text-align:left">${esc(valor)}</td></tr>`)
 			} else {
-				g.filas.push(`<tr><td style="width:60%">${esc(c.etiqueta)}</td><td class="valor" style="width:25%">${esc(valor)}</td><td style="width:15%;text-align:center">${unidad ? esc(unidad) : ''}</td></tr>`)
+				const referencia = refs?.get(normalizarClave(c.clave)) ?? refs?.get(normalizarClave(c.etiqueta)) ?? ''
+				const celda3 = referencia || (unidad ? String(unidad) : '')
+				g.filas.push(
+					integraRefs
+						? `<tr><td style="width:38%">${esc(c.etiqueta)}</td><td class="valor" style="width:22%;text-align:center">${esc(valor)}</td><td style="width:40%;text-align:left">${esc(celda3)}</td></tr>`
+						: `<tr><td style="width:60%">${esc(c.etiqueta)}</td><td class="valor" style="width:25%">${esc(valor)}</td><td style="width:15%;text-align:center">${esc(celda3)}</td></tr>`
+				)
 			}
 		}
 	}
@@ -126,44 +154,132 @@ function cuerpoExamenHtml(d: DatosReporte): string {
 	}
 
 	const observaciones = fila?.['observaciones'] ?? ''
-	const html = `
-		<div class="pagina">
-			${cabeceraHtml(d.config)}
-			<div class="titulo">${esc(d.examen.examen ?? d.procedimiento.nombre ?? 'Resultados')}</div>
-			<div class="subtitulo">${esc(formatearFechaLarga(d.examen.fecha ?? d.procedimiento.info ?? ''))}</div>
-			${pacienteHtml(d.paciente)}
-			${filas.length ? `<table class="detalle"><tr><th>Examen / Parámetro</th><th style="width:25%;text-align:center">Resultado</th><th style="width:15%;text-align:center">Unidades</th></tr>${filas.join('')}</table>` : ''}
-			${d.procedimiento.constante ? `<p class="referencia"><b>Valor de referencia:</b> ${esc(d.procedimiento.constante)}</p>` : ''}
-			${htmlTablaReferencia(d.procedimiento.constante2)}
-			${observaciones ? `<div class="obs-bloque"><h3>Observaciones</h3><div class="obs">${esc(observaciones)}</div></div>` : ''}
-			${pieHtml(d.config)}
-		</div>`
-	return html
+	// Con referencias integradas por fila no se imprime el bloque aparte (una sola
+	// tabla). Si constante2 trae otro contenido (HTML/tabla de clasificación o texto):
+	//  - exámenes de un solo valor (tipo 1/2, p. ej. hemoglobina glicosilada): el
+	//    bloque se imprime pegado DEBAJO del resultado (valor arriba, referencia abajo);
+	//  - exámenes de varios valores: el bloque sale al FRENTE (antes de los resultados).
+	const tablaReferencia = integraRefs ? '' : htmlTablaReferencia(d.procedimiento.constante2)
+	const lineaReferencia = integraRefs
+		? ''
+		: d.procedimiento.constante
+			? `<p class="referencia"><b>Valor de referencia:</b> ${esc(d.procedimiento.constante)}</p>`
+			: ''
+	const unicoValor = Boolean(esquema?.conExamen)
+	const referenciaFrente = !unicoValor && tablaReferencia
+		? tablaReferencia + (lineaReferencia ? '\n' + lineaReferencia : '')
+		: ''
+	const referenciaDebajo = unicoValor && tablaReferencia
+		? tablaReferencia + (lineaReferencia ? '\n' + lineaReferencia : '')
+		: tablaReferencia ? '' : lineaReferencia
+	const cabeceraTabla = integraRefs
+		? '<tr><th style="width:38%">Examen / Parámetro</th><th style="width:22%;text-align:center">Resultado</th><th style="width:40%;text-align:left">Valores de referencia</th></tr>'
+		: '<tr><th>Examen / Parámetro</th><th style="width:25%;text-align:center">Resultado</th><th style="width:15%;text-align:center">Unidades</th></tr>'
+	return `${referenciaFrente}
+		${filas.length ? `<table class="detalle">${cabeceraTabla}${filas.join('')}</table>` : ''}
+		${referenciaDebajo}
+		${observaciones ? `<div class="obs-bloque"><h3>Observaciones</h3><div class="obs">${esc(observaciones)}</div></div>` : ''}`
 }
 
-function pieHtml(config: Configuracion): string {
-	const firma = config.urFirmaLaboratorio
-	const firmaTag = firma ? `<img src="${esc(firma.startsWith('data:') ? firma : `data:image/png;base64,${firma}`)}" alt="firma" />` : ''
-	const bio = config.bacteriologoLaboratorio
-	const tp = config.tarjetaPLaboratorio
-	return `<div class="pie"><div class="nota">Documento generado por el sistema del laboratorio.<br />Los resultados corresponden exclusivamente a la muestra del paciente.</div><div class="firma">${firmaTag}<div class="linea">${esc(bio || 'Bacteriólogo')}${tp ? esc(` — T.P. ${tp}`) : ''}</div><div class="cargo">Bacteriólogo</div></div></div>`
+/** Página de un examen individual (cabecera + título + paciente + contenido). */
+function cuerpoExamenHtml(d: DatosReporte, firmas: FirmaActiva[] | null): string {
+	const firma = firmaActivaParaFecha(firmas, d.examen.fecha)
+	return `<div class="pagina">
+		${cabeceraHtml(d.config)}
+		${tituloExamenHtml(d)}
+		${pacienteHtml(d.paciente)}
+		${contenidoExamenHtml(d, firmas)}
+		${pieHtml(d.config, firma)}
+	</div>`
+}
+
+let firmasCache: Promise<FirmaActiva[] | null> | null = null
+
+/** Firmas por fecha usadas por el servidor (printphp/firmas.json vía getFirmas.php). */
+async function cargarFirmasServidor(): Promise<FirmaActiva[] | null> {
+	if (!firmasCache) {
+		firmasCache = (async () => {
+			try {
+				const res = await fetch(`${getBaseUrl()}printphp/getFirmas.php`)
+				if (!res.ok) return null
+				const j: unknown = await res.json()
+				return Array.isArray(j) ? (j as FirmaActiva[]) : null
+			} catch {
+				return null
+			}
+		})()
+	}
+	return firmasCache
+}
+
+/** Firma del pie: se usa la activa por fecha (misma fuente que los PDF del
+ *  servidor); si no hay, se usa la config de la BD. */
+function pieHtml(config: Configuracion, firma?: FirmaActiva | null): string {
+	let firmaTag = ''
+	const imagen = firma?.imagen_firma || config.urFirmaLaboratorio
+	if (imagen) {
+		let src = imagen
+		if (!src.startsWith('data:') && !/^https?:\/\//i.test(src)) src = `data:image/png;base64,${src}`
+		firmaTag = `<img src="${esc(src)}" alt="firma" />`
+	} else if (firma?.archivo) {
+		firmaTag = `<img src="${esc(getBaseUrl() + 'printphp/' + firma.archivo)}" alt="firma" />`
+	}
+	const nombreFirma = firma?.nombre ? String(firma.nombre).trim() : ''
+	const partes = nombreFirma ? nombreFirma.match(/^(.*?):?\s*T\.P\.\s*(.*)$/i) : null
+	const bio = partes
+		? partes[1].trim()
+		: nombreFirma || config.bacteriologoLaboratorio || 'Bacteriólogo'
+	const tp = partes
+		? `T.P. ${partes[2].trim()}`
+		: !nombreFirma && config.tarjetaPLaboratorio
+			? `T.P. ${config.tarjetaPLaboratorio}`
+			: ''
+	const cargo = (firma?.cargo && String(firma.cargo).trim()) || 'Bacteriólogo'
+	return `<div class="pie"><div class="nota">Documento generado por el sistema del laboratorio.<br />Los resultados corresponden exclusivamente a la muestra del paciente.</div><div class="firma">${firmaTag}<div class="linea">${esc(bio)}${tp ? esc(` — ${tp}`) : ''}</div><div class="cargo">${esc(cargo)}</div></div></div>`
 }
 
 /** Reporte de un solo examen. */
-export function htmlReporteExamen(d: DatosReporte): string {
-	return `<html><head><meta charset="utf-8" /><title>${esc(d.examen.examen ?? 'Resultados')}</title><style>${css()}</style></head><body>${cuerpoExamenHtml(d)}</body></html>`
+export async function htmlReporteExamen(d: DatosReporte): Promise<string> {
+	const firmas = await cargarFirmasServidor()
+	return `<html><head><meta charset="utf-8" /><title>${esc(d.examen.examen ?? 'Resultados')}</title><style>${css()}</style></head><body>${cuerpoExamenHtml(d, firmas)}</body></html>`
 }
 
-/** Reporte conjunto (todos los exámenes) de un paciente+fecha. */
-export function htmlReporteTodos(
+/** Reporte conjunto (todos los exámenes) de un paciente+fecha.
+ *  Cabecera del laboratorio y datos del paciente UNA sola vez al inicio; cada
+ *  examen sigue con su título, resultados y referencias, y la firma aparece
+ *  UNA sola vez, al final del documento. */
+export async function htmlReporteTodos(
 	config: Configuracion,
 	paciente: Paciente,
 	items: Array<{ examen: Examen; procedimiento: Procedimiento; esquema?: EsquemaExamen; fila?: Record<string, unknown> | null }>
-): string {
-	const paginas = items
-		.map((i) => cuerpoExamenHtml({ config, paciente, examen: i.examen, procedimiento: i.procedimiento, esquema: i.esquema, fila: i.fila }))
-		.join('')
-	return `<html><head><meta charset="utf-8" /><title>Resultados — ${esc(nombreCompletoPaciente(paciente))}</title><style>${css()}</style></head><body>${paginas}</body></html>`
+): Promise<string> {
+	const firmas = await cargarFirmasServidor()
+	const armar = (i: (typeof items)[number]): DatosReporte => ({
+		config,
+		paciente,
+		examen: i.examen,
+		procedimiento: i.procedimiento,
+		esquema: i.esquema,
+		fila: i.fila
+	})
+	const paginas: string[] = []
+	if (items.length === 0) {
+		paginas.push(`<div class="pagina">${cabeceraHtml(config)}${pacienteHtml(paciente)}</div>`)
+	} else {
+		items.forEach((it, idx) => {
+			paginas.push(`<div class="pagina">
+			${idx === 0 ? cabeceraHtml(config) + pacienteHtml(paciente) : ''}
+			${tituloExamenHtml(armar(it))}
+			${contenidoExamenHtml(armar(it), firmas)}
+			</div>`)
+		})
+		// Firma única al final (según la fecha del último examen del lote).
+		const ultimo = items[items.length - 1]
+		paginas.push(`<div class="pagina">
+			${pieHtml(config, firmaActivaParaFecha(firmas, ultimo.examen.fecha))}
+			</div>`)
+	}
+	return `<html><head><meta charset="utf-8" /><title>Resultados — ${esc(nombreCompletoPaciente(paciente))}</title><style>${css()}</style></head><body>${paginas.join('')}</body></html>`
 }
 
 export interface CargaImpresion {

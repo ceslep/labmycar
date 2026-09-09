@@ -15,7 +15,8 @@
 	import { htmlReporteExamen } from '../lib/reportes/print'
 	import { verReporte } from '../lib/stores/reportevista.svelte'
 	import { navigate } from '../lib/router.svelte'
-	import { toast } from '../lib/stores/toast.svelte'
+	import { conImprimiendo } from '../lib/stores/imprimiendo.svelte'
+import { toast } from '../lib/stores/toast.svelte'
 	import { calcularEdad, formatearFechaMedia } from '../lib/utils/format'
 	import Icon from '../lib/ui/Icon.svelte'
 	import Loader from '../lib/ui/Loader.svelte'
@@ -159,47 +160,49 @@
 	}
 
 	async function imprimir() {
-		if (!esquema || !paciente?.identificacion) return
-		// Si el resultado ya está emitido, no se guarda: solo se imprime/consulta.
-		if (!realizado) {
-			guardando = true
-			const ok = await guardarDetalle(esquema.tabla, construirPayload(), codexamen, paciente.identificacion, fecha)
-			guardando = false
-			if (!ok) {
-				toast('No se pudieron guardar los resultados antes de imprimir.', 'error')
-				return
+	await conImprimiendo('Preparando reporte…', async () => {
+			if (!esquema || !paciente?.identificacion) return
+			// Si el resultado ya está emitido, no se guarda: solo se imprime/consulta.
+			if (!realizado) {
+				guardando = true
+				const ok = await guardarDetalle(esquema.tabla, construirPayload(), codexamen, paciente.identificacion, fecha)
+				guardando = false
+				if (!ok) {
+					toast('No se pudieron guardar los resultados antes de imprimir.', 'error')
+					return
+				}
 			}
-		}
-		try {
-			const [config, fila] = await Promise.all([
-				getConfiguracion(),
-				esquema.cargar(paciente.identificacion, fecha, codexamen)
-			])
-			const nombreExamen = procedimiento?.nombre ?? codexamen
-			const proc: Procedimiento = procedimiento ?? { codigo: codexamen, nombre: nombreExamen }
-			verReporte(
-				htmlReporteExamen({
-					config: config ?? {},
-					paciente,
-					examen: {
-						identificacion: paciente.identificacion,
-						codexamen,
-						fecha,
-						tipo,
-						examen: nombreExamen,
-						info: procedimiento?.info,
-						entidad: paciente.entidad
-					},
-					procedimiento: proc,
-					esquema,
-					fila
-				}),
-				`Reporte — ${nombreExamen}`
-			)
-		} catch {
-			toast('Error al preparar el reporte', 'error')
-		}
-	}
+			try {
+				const [config, fila] = await Promise.all([
+					getConfiguracion(),
+					esquema.cargar(paciente.identificacion, fecha, codexamen)
+				])
+				const nombreExamen = procedimiento?.nombre ?? codexamen
+				const proc: Procedimiento = procedimiento ?? { codigo: codexamen, nombre: nombreExamen }
+				verReporte(
+					await htmlReporteExamen({
+						config: config ?? {},
+						paciente,
+						examen: {
+							identificacion: paciente.identificacion,
+							codexamen,
+							fecha,
+							tipo,
+							examen: nombreExamen,
+							info: procedimiento?.info,
+							entidad: paciente.entidad
+						},
+						procedimiento: proc,
+						esquema,
+						fila
+					}),
+					`Reporte — ${nombreExamen}`
+				)
+			} catch {
+				toast('Error al preparar el reporte', 'error')
+			}
+	})
+}
 </script>
 
 <Page

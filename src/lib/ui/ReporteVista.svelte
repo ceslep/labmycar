@@ -19,7 +19,23 @@
 	})
 
 	function imprimir() {
-		// Intento 1: imprimir el contenido del iframe directamente.
+		// Reporte del servidor (PDF): se intenta imprimir el iframe; si el visor no lo
+		// permite, se abre el PDF en pestaña para imprimirlo desde el visor del navegador.
+		if (reporteVista.url) {
+			try {
+				const cw = iframeEl?.contentWindow
+				if (cw && typeof cw.print === 'function') {
+					cw.focus()
+					cw.print()
+					return
+				}
+			} catch {
+				/* continúa con el respaldo */
+			}
+			window.open(reporteVista.url, '_blank')
+			return
+		}
+		// Reporte HTML del cliente.
 		try {
 			const cw = iframeEl?.contentWindow
 			if (cw && typeof cw.print === 'function') {
@@ -30,7 +46,6 @@
 		} catch {
 			/* continúa con el respaldo */
 		}
-		// Intento 2 (navegadores que no imprimen desde iframe): ventana temporal con el mismo HTML.
 		try {
 			const win = abrirVentanaImpresion()
 			if (win && escribirReporte(win, reporteVista.html)) return
@@ -92,12 +107,21 @@
 			<div class="min-h-0 flex-1 overflow-auto bg-neutral-200/70 p-2 sm:p-6">
 				<div class="mx-auto w-full max-w-[800px] shadow-lg">
 					<!-- svelte-ignore a11y_no_static_element_interactions -->
-					<iframe
-						bind:this={iframeEl}
-						title={reporteVista.titulo || 'Reporte'}
-						srcdoc={reporteVista.html}
-						class="h-[72vh] w-full rounded-sm border-0 bg-white sm:h-[74vh]"
-					></iframe>
+					{#if reporteVista.url}
+						<iframe
+							bind:this={iframeEl}
+							title={reporteVista.titulo || 'Reporte'}
+							src={reporteVista.url}
+							class="h-[72vh] w-full rounded-sm border-0 bg-white sm:h-[74vh]"
+						></iframe>
+					{:else}
+						<iframe
+							bind:this={iframeEl}
+							title={reporteVista.titulo || 'Reporte'}
+							srcdoc={reporteVista.html}
+							class="h-[72vh] w-full rounded-sm border-0 bg-white sm:h-[74vh]"
+						></iframe>
+					{/if}
 				</div>
 			</div>
 		</div>
